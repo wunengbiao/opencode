@@ -1,4 +1,4 @@
-import { createEffect, createMemo, For, Show, type Accessor, type JSX } from "solid-js"
+import { createEffect, createMemo, For, onCleanup, onMount, Show, type Accessor, type JSX } from "solid-js"
 import { FileIcon } from "@opencode-ai/ui/file-icon"
 import { Icon } from "@opencode-ai/ui/icon"
 import { IconButton } from "@opencode-ai/ui/icon-button"
@@ -51,6 +51,7 @@ export function PromptInputV2(props: PromptInputV2Props) {
   const state = props.controller.state
   const view = props.controller.view
   let editor: HTMLDivElement | undefined
+  let root: HTMLDivElement | undefined
   let localInput = false
   const updateCursor = () => {
     if (!editor || !window.getSelection()?.isCollapsed) return
@@ -63,18 +64,54 @@ export function PromptInputV2(props: PromptInputV2Props) {
     transition: "opacity 200ms ease",
   }))
 
+  onMount(() => {
+    document.addEventListener("selectionchange", snapSelection)
+    onCleanup(() => document.removeEventListener("selectionchange", snapSelection))
+  })
+  const snapSelection = () => {
+    if (editor) snapCaret(editor)
+  }
+
   createEffect(() => {
     const parts = props.controller.parts()
     if (!editor) return
     if (localInput) {
       localInput = false
+      // Deleting the chip's trailing space can leave an uneditable chip as the
+      // last node, where the caret can no longer be placed - heal it.
+      const last = editor.lastChild
+      if (last instanceof HTMLElement && last.dataset.mention) {
+        editor.appendChild(document.createTextNode("\u200B"))
+      }
+      normalizeEmptyEditor(editor)
+      // Re-anchor the caret into a text node if the browser left it on a chip
+      // boundary or dropped it out of the editor, so typing keeps working.
+      snapCaret(editor)
       return
     }
     renderPromptInputV2Editor(editor, parts)
+    // The store owns the caret after programmatic writes (mention insert,
+    // history nav, open-command buttons); restore it deterministically instead
+    // of relying on the browser's focus-restoration heuristics.
+    if (document.activeElement === editor) props.controller.restoreCaret()
   })
 
   return (
-    <div class={`relative size-full flex flex-col gap-0 ${props.class ?? ""}`}>
+    <div
+      ref={(element) => (root = element)}
+      class={`relative size-full flex flex-col gap-0 ${props.class ?? ""}`}
+      onMouseDown={(event) => {
+        if (event.button !== 0) return
+        const target = event.target
+        if (!(target instanceof HTMLElement)) return
+        if (target.closest('[data-component="prompt-input"]')) return
+        if (target.closest(FOCUSABLE_SELECTOR)) return
+        // Popover items, toolbar toggles, and the submit button live inside
+        // this component; never let them take focus away from the editor.
+        event.preventDefault()
+        requestAnimationFrame(() => editor?.focus())
+      }}
+    >
       <input
         ref={props.controller.setFileInput}
         type="file"
@@ -181,6 +218,27 @@ export function PromptInputV2(props: PromptInputV2Props) {
             onPointerUp={updateCursor}
             onPaste={props.controller.onPaste}
             onFocus={() => props.controller.dispatch({ type: "focus.editor" })}
+            onFocusOut={(event) => {
+              const related = event.relatedTarget
+              if (related instanceof HTMLElement) {
+                if (related.closest(FOCUSABLE_SELECTOR)) return
+                if (!root?.contains(related)) return
+              }
+              // A null relatedTarget means the focused element was removed from
+              // the DOM, e.g. the popover closing while a suggestion button
+              // held focus - reclaim the caret for the editor.
+              requestAnimationFrame(() => {
+                if (!editor) return
+                const current = document.activeElement
+                if (current === editor) return
+                if (current instanceof HTMLElement) {
+                  if (current.closest(FOCUSABLE_SELECTOR)) return
+                  if (current !== document.body && !root?.contains(current)) return
+                }
+                editor.focus()
+                snapCaret(editor)
+              })
+            }}
           />
           <Show when={!props.controller.value()}>
             <div
@@ -269,26 +327,111 @@ export function PromptInputV2(props: PromptInputV2Props) {
   )
 }
 
+// Elements that legitimately take focus away from the editor (other editable
+// controls, dialogs, and menus); caret repairs must not steal focus from them.
+const FOCUSABLE_SELECTOR =
+  "input, textarea, select, [contenteditable='true'], [role='dialog'], [role='menu'], [role='listbox'], [role='combobox']"
+
+// Chromium keeps a placeholder <br> in a white-space: pre-wrap contenteditable
+// when the last character is deleted; a caret parked after it lands on a
+// second line and typing continues there. Replace it with our ZWSP anchor so
+// an emptied editor stays on the first line.
+function normalizeEmptyEditor(editor: HTMLDivElement) {
+  const nodes = Array.from(editor.childNodes)
+  if (nodes.length === 0) return false
+  const stray = nodes.every(
+    (node) =>
+      (node instanceof Text && node.textContent === "") ||
+      (node instanceof HTMLElement && node.tagName === "BR"),
+  )
+  if (!stray) return false
+  for (const node of nodes) node.remove()
+  const anchor = document.createTextNode("\u200B")
+  editor.appendChild(anchor)
+  placeCaret(anchor, 1)
+  return true
+}
+
+// A collapsed caret can rest on an uneditable chip boundary, inside the chip,
+// or outside the editor; typed input then lands before the chip or nowhere.
+// Snap those positions into the adjacent text node so typing stays predictable.
+function snapCaret(editor: HTMLDivElement) {
+  const selection = window.getSelection()
+  if (!selection || !selection.isCollapsed || selection.rangeCount === 0) return
+  const anchor = selection.anchorNode
+  if (!anchor || !editor.contains(anchor)) {
+    if (document.activeElement !== editor) return
+    editor.focus()
+    const last = editor.lastChild
+    if (last instanceof Text && last.length > 0) return placeCaret(last, last.length)
+    if (normalizeEmptyEditor(editor)) return
+    const node = document.createTextNode("\u200B")
+    editor.appendChild(node)
+    return placeCaret(node, 1)
+  }
+  if (anchor === editor) {
+    const before = editor.childNodes[selection.anchorOffset - 1]
+    const after = editor.childNodes[selection.anchorOffset]
+    if (before instanceof HTMLElement && before.dataset.mention) return snapAfterChip(before)
+    if (after instanceof HTMLElement && after.dataset.mention) return snapBeforeChip(after)
+    return
+  }
+  if (anchor instanceof HTMLElement && anchor.dataset.mention) {
+    return selection.anchorOffset <= 0 ? snapBeforeChip(anchor) : snapAfterChip(anchor)
+  }
+}
+
+function snapAfterChip(chip: HTMLElement) {
+  const following = chip.nextSibling
+  if (following instanceof Text) return placeCaret(following, 0)
+  // No editable node follows the chip - insert a zero-width anchor so the
+  // caret keeps a placeable position right after the chip.
+  const node = document.createTextNode("\u200B")
+  chip.after(node)
+  placeCaret(node, 0)
+}
+
+function snapBeforeChip(chip: HTMLElement) {
+  const previous = chip.previousSibling
+  if (previous instanceof Text) return placeCaret(previous, previous.length)
+  const node = document.createTextNode("\u200B")
+  chip.before(node)
+  placeCaret(node, 1)
+}
+
+function placeCaret(node: Node, offset: number) {
+  const selection = window.getSelection()
+  if (!selection) return
+  const range = document.createRange()
+  range.setStart(node, offset)
+  range.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(range)
+}
+
 function renderPromptInputV2Editor(editor: HTMLDivElement, prompt: PromptInputV2Prompt) {
   const active = document.activeElement === editor
-  editor.replaceChildren(
-    ...prompt.flatMap<Node>((part) => {
-      if (part.type === "image") return []
-      if (part.type === "text") return [document.createTextNode(part.content)]
-      const mention = document.createElement("span")
-      mention.textContent = part.content
-      mention.contentEditable = "false"
-      mention.dataset.mention =
-        part.type === "file" && part.mime === "application/x-directory" ? "reference" : part.type
-      if (part.type === "agent") mention.dataset.name = part.name
-      if (part.type === "file") {
-        mention.dataset.path = part.path
-        if (part.mime) mention.dataset.mime = part.mime
-        if (part.filename) mention.dataset.filename = part.filename
-      }
-      return [mention]
-    }),
-  )
+  const nodes = prompt.flatMap<Node>((part) => {
+    if (part.type === "image") return []
+    if (part.type === "text") return [document.createTextNode(part.content)]
+    const mention = document.createElement("span")
+    mention.textContent = part.content
+    mention.contentEditable = "false"
+    mention.dataset.mention =
+      part.type === "file" && part.mime === "application/x-directory" ? "reference" : part.type
+    if (part.type === "agent") mention.dataset.name = part.name
+    if (part.type === "file") {
+      mention.dataset.path = part.path
+      if (part.mime) mention.dataset.mime = part.mime
+      if (part.filename) mention.dataset.filename = part.filename
+    }
+    return [mention]
+  })
+  // Keep a trailing text node so the caret stays placeable after a mention chip
+  // (an uneditable element as the last child has no caret position after it).
+  const last = nodes[nodes.length - 1]
+  if (!(last instanceof Text) || last.length === 0) nodes.push(document.createTextNode("\u200B"))
+  editor.replaceChildren(...nodes)
   if (!active) return
   const selection = window.getSelection()
   const range = document.createRange()
@@ -336,7 +479,7 @@ function parsePromptInputV2Editor(editor: HTMLDivElement) {
   }
   const visit = (node: Node) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      buffer += node.textContent ?? ""
+      buffer += (node.textContent ?? "").replace(/\u200B/g, "")
       return
     }
     if (!(node instanceof HTMLElement)) return
@@ -368,11 +511,13 @@ function parsePromptInputV2Editor(editor: HTMLDivElement) {
 
 function promptInputV2Cursor(editor: HTMLDivElement) {
   const selection = window.getSelection()
-  if (!selection?.rangeCount || !editor.contains(selection.anchorNode)) return editor.textContent?.length ?? 0
+  if (!selection?.rangeCount || !editor.contains(selection.anchorNode)) {
+    return (editor.textContent ?? "").replace(/\u200B/g, "").length
+  }
   const range = selection.getRangeAt(0).cloneRange()
   range.selectNodeContents(editor)
   range.setEnd(selection.anchorNode!, selection.anchorOffset)
-  return range.toString().length
+  return range.toString().replace(/\u200B/g, "").length
 }
 
 export function PromptInputV2Attachments(props: {

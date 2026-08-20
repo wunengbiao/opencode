@@ -215,7 +215,7 @@ export const { use: useFile, provider: FileProvider } = createSimpleContext({
           { signal: options?.signal },
         )
         .then(
-          (x) => x.data.map((entry) => path.normalize(entry.path)),
+          (x) => x.data.map((entry) => ({ path: path.normalize(entry.path), type: entry.type })),
           (error) => {
             if (options?.signal?.aborted) throw error
             return []
@@ -296,8 +296,9 @@ export const { use: useFile, provider: FileProvider } = createSimpleContext({
       selectedLines,
       setSelectedLines,
       searchFiles: (query: string, options?: { limit?: number; signal?: AbortSignal }) =>
-        search(query, "false", options),
-      searchFilesAndDirectories: (query: string) => search(query, "true"),
+        search(query, "false", options).then((entries) => entries.map((entry) => entry.path)),
+      searchFilesAndDirectories: (query: string) => search(query, "true").then((entries) => entries.map((entry) => entry.path)),
+      searchFileEntries: (query: string) => search(query, "true"),
     }
   },
 })

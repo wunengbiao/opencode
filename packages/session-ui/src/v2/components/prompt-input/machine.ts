@@ -93,6 +93,8 @@ function inputChanged(
       { type: "draft.setText", value: "" },
     ])
   }
+  // The value joins chip contents too, so a mention chip followed directly by typed
+  // path characters ("@src" + "/app.ts") keeps completing as one query.
   const context = value.slice(0, cursor ?? value.length).match(/(?:^|\s)@([^\s@]*)$/)
   if (context) {
     const query = context[1] ?? ""

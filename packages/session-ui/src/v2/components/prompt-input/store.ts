@@ -74,13 +74,16 @@ export function createPromptInputV2Store(input: PromptInputV2StoreInput) {
       setStore()("context", "items", (items) => items.filter((item) => item.key !== key))
     },
     addMention(mention: PromptInputV2FilePart | PromptInputV2AgentPart) {
-      const text = store()
-        .prompt.map((part) => ("content" in part ? part.content : ""))
-        .join("")
+      const parts = store().prompt
+      const text = parts.map((part) => ("content" in part ? part.content : "")).join("")
       const end = store().cursor ?? text.length
-      const start = text.slice(0, end).lastIndexOf("@")
-      setStore()("prompt", insertMention(store().prompt, start < 0 ? end : start, end, mention))
-      setStore()("cursor", (start < 0 ? end : start) + mention.content.length + 1)
+      // The trigger may start at a mention chip's own "@": the chip plus typed path
+      // characters form one query, so the replaced range can span whole chips.
+      const match = text.slice(0, end).match(/(?:^|\s)@([^\s@]*)$/)
+      const start = match ? end - (match[1] ?? "").length - 1 : -1
+      const inserted = insertMention(parts, start < 0 ? end : start, end, mention)
+      setStore()("prompt", inserted.prompt)
+      setStore()("cursor", inserted.cursor)
     },
     addAttachment(attachment: PromptInputV2Attachment) {
       setStore()("prompt", (prompt) => [...prompt, attachment])
@@ -119,22 +122,71 @@ function insertMention(
   start: number,
   end: number,
   mention: PromptInputV2FilePart | PromptInputV2AgentPart,
-): PromptInputV2Prompt {
+): { prompt: PromptInputV2Prompt; cursor: number } {
   let position = 0
+  let inserted = false
+  let separator = 0
   const parts = prompt.flatMap<PromptInputV2Prompt[number]>((part) => {
     if (part.type === "image") return [part]
     const partStart = position
     position += part.content.length
-    if (part.type !== "text" || start < partStart || end > position) return [part]
-    const before = part.content.slice(0, start - partStart)
-    const after = part.content.slice(end - partStart)
+    if (end <= partStart || start >= position) return [part]
+    const before = part.type === "text" ? part.content.slice(0, Math.max(0, start - partStart)) : ""
+    const after = part.type === "text" ? part.content.slice(Math.max(0, end - partStart)) : ""
+    if (inserted) return after ? [{ type: "text" as const, content: after, start: 0, end: 0 }] : []
+    inserted = true
+    const tail = mentionTail(mention, after)
+    separator = tail ? 1 : 0
     return [
       ...(before ? [{ type: "text" as const, content: before, start: 0, end: 0 }] : []),
       mention,
-      { type: "text" as const, content: ` ${after}`, start: 0, end: 0 },
+      ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : []),
     ]
   })
-  return withOffsets(parts)
+  if (inserted) return { prompt: withOffsets(parts), cursor: start + mention.content.length + separator }
+  // The trigger range was empty (no "@": plain cursor insertion) - insert at the
+  // cursor instead so the mention is never dropped.
+  const at = insertMentionAt(parts, end, mention)
+  return { prompt: withOffsets(at.prompt), cursor: at.cursor }
+}
+
+// Directory mentions glue to the caret so "@src" can keep completing into
+// "@src/lib"; every other mention (and anything mid-sentence) is followed by a
+// separator space.
+function mentionTail(mention: PromptInputV2FilePart | PromptInputV2AgentPart, after: string) {
+  if (after) return ` ${after}`
+  return mention.type === "file" && mention.mime === "application/x-directory" ? "" : " "
+}
+
+function insertMentionAt(
+  prompt: PromptInputV2Prompt,
+  cursor: number,
+  mention: PromptInputV2FilePart | PromptInputV2AgentPart,
+): { prompt: PromptInputV2Prompt; cursor: number } {
+  let position = 0
+  let inserted = false
+  let separator = 0
+  const parts = prompt.flatMap<PromptInputV2Prompt[number]>((part) => {
+    if (part.type === "image") return [part]
+    const start = position
+    position += part.content.length
+    if (inserted || part.type !== "text" || cursor < start || cursor > position) return [part]
+    inserted = true
+    const offset = cursor - start
+    const tail = mentionTail(mention, part.content.slice(offset))
+    separator = tail ? 1 : 0
+    return [
+      ...(offset > 0 ? [{ type: "text" as const, content: part.content.slice(0, offset), start: 0, end: 0 }] : []),
+      mention,
+      ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : []),
+    ]
+  })
+  if (!inserted) {
+    const tail = mentionTail(mention, "")
+    parts.push(mention, ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : []))
+    return { prompt: parts, cursor: promptLength(parts) }
+  }
+  return { prompt: parts, cursor: cursor + mention.content.length + separator }
 }
 
 function withOffsets(prompt: PromptInputV2Prompt): PromptInputV2Prompt {

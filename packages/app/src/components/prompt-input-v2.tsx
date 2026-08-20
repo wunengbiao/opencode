@@ -336,12 +336,19 @@ export function usePromptInputV2Controller(props: PromptInputV2ControllerProps):
     commands,
     context,
     searchContextFiles: async (query) =>
-      (await files.searchFilesAndDirectories(query)).map((path) => ({
-        id: `file:${path}`,
+      (await files.searchFileEntries(query)).map((entry) => ({
+        id: `file:${entry.path}`,
         kind: "file",
-        label: path,
-        path,
-        mention: { type: "file", path, content: `@${path}`, start: 0, end: 0 },
+        label: entry.path,
+        path: entry.path,
+        mention: {
+          type: "file",
+          path: entry.path,
+          content: `@${entry.path}`,
+          start: 0,
+          end: 0,
+          ...(entry.type === "directory" ? { mime: "application/x-directory" } : {}),
+        },
       })),
     onContextRemove(item) {
       if (item?.commentID) comments.remove(item.path, item.commentID)

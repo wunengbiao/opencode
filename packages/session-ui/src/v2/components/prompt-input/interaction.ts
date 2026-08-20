@@ -429,6 +429,11 @@ export function createPromptInputV2Controller(input: {
     setQuery(value: string) {
       dispatch({ type: "popover.query", value })
     },
+    restoreCaret() {
+      if (!editor) return
+      editor.focus()
+      setEditorCursor(editor, draft.state.cursor ?? promptLength(draft.state.prompt))
+    },
   }
 }
 
@@ -462,21 +467,88 @@ function editorCursor(editor: HTMLElement) {
 
 function setEditorCursor(editor: HTMLElement | undefined, cursor: number) {
   if (!editor) return
-  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT)
+  const selection = window.getSelection()
+  if (!selection) return
   let remaining = cursor
-  let node = walker.nextNode()
-  while (node) {
-    const length = node.textContent?.length ?? 0
-    if (remaining <= length) {
-      const range = document.createRange()
-      range.setStart(node, remaining)
-      range.collapse(true)
-      const selection = window.getSelection()
-      selection?.removeAllRanges()
-      selection?.addRange(range)
-      return
+  for (const child of Array.from(editor.childNodes)) {
+    if (child instanceof HTMLElement && child.dataset.mention) {
+      const length = child.textContent?.length ?? 0
+      // A caret can never rest inside an uneditable chip; snap it to the
+      // nearest valid side instead.
+      if (remaining === 0) return placeCaretBefore(editor, child)
+      if (remaining <= length) return placeCaretAfter(editor, child)
+      remaining -= length
+      continue
     }
-    remaining -= length
-    node = walker.nextNode()
+    if (child instanceof Text) {
+      if (remaining <= child.length) {
+        const range = document.createRange()
+        range.setStart(child, remaining)
+        range.collapse(true)
+        selection.removeAllRanges()
+        selection.addRange(range)
+        return
+      }
+      remaining -= child.length
+      continue
+    }
   }
+  const last = editor.lastChild
+  if (last instanceof Text && last.length > 0) {
+    const range = document.createRange()
+    range.setStart(last, last.length)
+    range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    return
+  }
+  const node = document.createTextNode("\u200B")
+  editor.appendChild(node)
+  const range = document.createRange()
+  range.setStart(node, node.length)
+  range.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(range)
+}
+
+function placeCaretBefore(editor: HTMLElement, chip: HTMLElement) {
+  const selection = window.getSelection()
+  if (!selection) return
+  const previous = chip.previousSibling
+  if (previous instanceof Text) {
+    const range = document.createRange()
+    range.setStart(previous, previous.length)
+    range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    return
+  }
+  const node = document.createTextNode("\u200B")
+  chip.before(node)
+  const range = document.createRange()
+  range.setStart(node, node.length)
+  range.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(range)
+}
+
+function placeCaretAfter(editor: HTMLElement, chip: HTMLElement) {
+  const selection = window.getSelection()
+  if (!selection) return
+  const following = chip.nextSibling
+  if (following instanceof Text) {
+    const range = document.createRange()
+    range.setStart(following, 0)
+    range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    return
+  }
+  const node = document.createTextNode("\u200B")
+  chip.after(node)
+  const range = document.createRange()
+  range.setStart(node, 0)
+  range.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(range)
 }

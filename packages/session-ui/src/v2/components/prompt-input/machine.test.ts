@@ -53,6 +53,63 @@ describe("prompt input v2 interaction machine", () => {
     expect(result.state.popover).toEqual({ type: "context", query: "sr" })
   })
 
+  test("opens context completion for path typed directly after a mention chip", () => {
+    const input: PromptInputV2PersistedState = {
+      prompt: [
+        { type: "file", path: "src", content: "@src", start: 0, end: 4 },
+        { type: "text", content: "rc ", start: 4, end: 7 },
+      ],
+      cursor: 6,
+      context: { items: [] },
+    }
+
+    const result = transitionPromptInputV2(
+      createPromptInputV2InteractionState(),
+      { type: "input.changed", value: "@srcrc ", persist: false },
+      input,
+    )
+
+    expect(result.state.popover).toEqual({ type: "context", query: "srcrc" })
+  })
+
+  test("keeps the context popover closed while the cursor trails the chip's space", () => {
+    const input: PromptInputV2PersistedState = {
+      prompt: [
+        { type: "file", path: "src", content: "@src", start: 0, end: 4 },
+        { type: "text", content: "rc ", start: 4, end: 7 },
+      ],
+      cursor: 7,
+      context: { items: [] },
+    }
+
+    const result = transitionPromptInputV2(
+      createPromptInputV2InteractionState(),
+      { type: "input.changed", value: "@srcrc ", persist: false },
+      input,
+    )
+
+    expect(result.state.popover).toEqual({ type: "closed" })
+  })
+
+  test("opens context completion for an @ typed after a mention chip", () => {
+    const input: PromptInputV2PersistedState = {
+      prompt: [
+        { type: "file", path: "src", content: "@src", start: 0, end: 4 },
+        { type: "text", content: " @co", start: 4, end: 8 },
+      ],
+      cursor: 8,
+      context: { items: [] },
+    }
+
+    const result = transitionPromptInputV2(
+      createPromptInputV2InteractionState(),
+      { type: "input.changed", value: "@src @co", persist: false },
+      input,
+    )
+
+    expect(result.state.popover).toEqual({ type: "context", query: "co" })
+  })
+
   test("enters shell mode from an initial exclamation mark", () => {
     const result = transitionPromptInputV2(
       createPromptInputV2InteractionState(),
