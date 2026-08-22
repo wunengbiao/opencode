@@ -17,3 +17,8 @@ bundle the assets as an application. The resulting app will be in `dist/`.
 ```bash
 bun run build && bun run package
 ```
+
+```bash
+OPENCODE_CHANNEL=prod MODELS_DEV_API_JSON=/Users/orion/Coding/Github/opencode/packages/opencode/models.dev.api.json bun run build
+OPENCODE_CHANNEL=prod bun run package:mac
+```

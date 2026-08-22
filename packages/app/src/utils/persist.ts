@@ -652,6 +652,12 @@ export function persisted<T>(
     const api: AsyncStorage = {
       getItem: async (key) => {
         const value = await readCurrentAsync({ storage: current, key, defaults, migrate: config.migrate })
+        // Writes made while this read was in flight are newer than anything in storage;
+        // returning the stored value here would clobber live edits with a stale snapshot.
+        if (draftLatest !== undefined && draftLatest !== JSON.stringify(defaults)) {
+          await current.setItem(key, draftLatest)
+          return draftLatest
+        }
         if (value !== undefined) return value
         const migrated = await migrateLegacyAsync({
           current,

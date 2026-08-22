@@ -156,7 +156,12 @@ export function createPromptInputV2Controller(input: {
       if (item) dispatch({ type: "popover.select", item })
       return
     }
-    if (command.type === "focus.editor") requestAnimationFrame(() => editor?.focus())
+    if (command.type === "focus.editor")
+    requestAnimationFrame(() => {
+      if (!editor || document.activeElement === editor) return
+      editor.focus()
+      setEditorCursor(editor, draft.state.cursor ?? promptLength(draft.state.prompt))
+    })
   }
 
   function dispatch(event: PromptInputV2InteractionEvent) {
@@ -245,7 +250,13 @@ export function createPromptInputV2Controller(input: {
 
   const restoreFocus = (cursor = draft.state.cursor ?? promptLength(draft.state.prompt)) => {
     requestAnimationFrame(() => {
-      editor?.focus()
+      if (!editor) return
+      if (document.activeElement !== editor) editor.focus()
+      const selection = window.getSelection()
+      // Never move a caret that is already validly placed inside the editor:
+      // a focus restore resolving after the first keystroke (async edit-load /
+      // history nav) would otherwise yank it to the front, inserting forward.
+      if (selection?.isCollapsed && selection.anchorNode && editor.contains(selection.anchorNode)) return
       setEditorCursor(editor, cursor)
     })
   }
@@ -431,7 +442,12 @@ export function createPromptInputV2Controller(input: {
     },
     restoreCaret() {
       if (!editor) return
-      editor.focus()
+      if (document.activeElement !== editor) editor.focus()
+      const selection = window.getSelection()
+      // Never move a caret that is already validly placed inside the editor:
+      // a restoration resolving after the first keystroke (async hydration /
+      // focus reclaim) would otherwise yank it to the front, inserting forward.
+      if (selection?.isCollapsed && selection.anchorNode && editor.contains(selection.anchorNode)) return
       setEditorCursor(editor, draft.state.cursor ?? promptLength(draft.state.prompt))
     },
   }

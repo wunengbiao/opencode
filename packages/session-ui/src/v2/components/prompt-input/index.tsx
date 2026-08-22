@@ -53,6 +53,7 @@ export function PromptInputV2(props: PromptInputV2Props) {
   let editor: HTMLDivElement | undefined
   let root: HTMLDivElement | undefined
   let localInput = false
+  let composing = false
   const updateCursor = () => {
     if (!editor || !window.getSelection()?.isCollapsed) return
     props.controller.onCursor(promptInputV2Cursor(editor))
@@ -69,7 +70,9 @@ export function PromptInputV2(props: PromptInputV2Props) {
     onCleanup(() => document.removeEventListener("selectionchange", snapSelection))
   })
   const snapSelection = () => {
-    if (editor) snapCaret(editor)
+    // IME composition fires a storm of selectionchange events with transient
+    // caret positions - moving the caret then corrupts the composition.
+    if (editor && !composing) snapCaret(editor)
   }
 
   createEffect(() => {
@@ -77,6 +80,9 @@ export function PromptInputV2(props: PromptInputV2Props) {
     if (!editor) return
     if (localInput) {
       localInput = false
+      // An active IME composition owns the DOM; touching nodes or moving the
+      // caret mid-composition corrupts where its committed text lands.
+      if (composing) return
       // Deleting the chip's trailing space can leave an uneditable chip as the
       // last node, where the caret can no longer be placed - heal it.
       const last = editor.lastChild
@@ -89,6 +95,9 @@ export function PromptInputV2(props: PromptInputV2Props) {
       snapCaret(editor)
       return
     }
+    // Rebuilding the DOM would cancel an in-flight IME composition - defer to
+    // the compositionend handler.
+    if (composing) return
     renderPromptInputV2Editor(editor, parts)
     // The store owns the caret after programmatic writes (mention insert,
     // history nav, open-command buttons); restore it deterministically instead
@@ -109,7 +118,13 @@ export function PromptInputV2(props: PromptInputV2Props) {
         // Popover items, toolbar toggles, and the submit button live inside
         // this component; never let them take focus away from the editor.
         event.preventDefault()
-        requestAnimationFrame(() => editor?.focus())
+        // Raw focus() parks the caret at the editor boundary, where typing
+        // would insert at the front of existing content; restore the store
+        // cursor instead.
+        requestAnimationFrame(() => {
+          if (!editor || document.activeElement === editor) return
+          props.controller.restoreCaret()
+        })
       }}
     >
       <input
@@ -218,6 +233,19 @@ export function PromptInputV2(props: PromptInputV2Props) {
             onPointerUp={updateCursor}
             onPaste={props.controller.onPaste}
             onFocus={() => props.controller.dispatch({ type: "focus.editor" })}
+            onCompositionStart={() => {
+              composing = true
+            }}
+            onCompositionEnd={() => {
+              composing = false
+              // The IME may still settle nodes after compositionend lands;
+              // repair the DOM once it has.
+              requestAnimationFrame(() => {
+                if (!editor || composing) return
+                normalizeEmptyEditor(editor)
+                snapCaret(editor)
+              })
+            }}
             onFocusOut={(event) => {
               const related = event.relatedTarget
               if (related instanceof HTMLElement) {
@@ -228,15 +256,14 @@ export function PromptInputV2(props: PromptInputV2Props) {
               // the DOM, e.g. the popover closing while a suggestion button
               // held focus - reclaim the caret for the editor.
               requestAnimationFrame(() => {
-                if (!editor) return
+                if (!editor || composing) return
                 const current = document.activeElement
                 if (current === editor) return
                 if (current instanceof HTMLElement) {
                   if (current.closest(FOCUSABLE_SELECTOR)) return
                   if (current !== document.body && !root?.contains(current)) return
                 }
-                editor.focus()
-                snapCaret(editor)
+                props.controller.restoreCaret()
               })
             }}
           />
@@ -374,7 +401,11 @@ function snapCaret(editor: HTMLDivElement) {
     const after = editor.childNodes[selection.anchorOffset]
     if (before instanceof HTMLElement && before.dataset.mention) return snapAfterChip(before)
     if (after instanceof HTMLElement && after.dataset.mention) return snapBeforeChip(after)
-    return
+    // Boundary anchors with plain-text neighbours come from programmatic
+    // focus() or removed nodes; snap into the adjacent text node so the next
+    // keystroke has a real anchor instead of an unstable editor-boundary one.
+    if (before instanceof Text && before.length > 0) return placeCaret(before, before.length)
+    if (after instanceof Text) return placeCaret(after, 0)
   }
   if (anchor instanceof HTMLElement && anchor.dataset.mention) {
     // Clicking the final chip usually means "place the caret at the end". When
@@ -428,7 +459,8 @@ function renderPromptInputV2Editor(editor: HTMLDivElement, prompt: PromptInputV2
   const active = document.activeElement === editor
   const nodes = prompt.flatMap<Node>((part) => {
     if (part.type === "image") return []
-    if (part.type === "text") return [document.createTextNode(part.content)]
+    // Empty text parts leave a stray node the caret can anchor to ambiguously.
+    if (part.type === "text") return part.content ? [document.createTextNode(part.content)] : []
     const mention = document.createElement("span")
     mention.textContent = part.content
     mention.contentEditable = "false"
