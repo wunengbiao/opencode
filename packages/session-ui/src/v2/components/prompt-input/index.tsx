@@ -377,8 +377,23 @@ function snapCaret(editor: HTMLDivElement) {
     return
   }
   if (anchor instanceof HTMLElement && anchor.dataset.mention) {
+    // Clicking the final chip usually means "place the caret at the end". When
+    // only whitespace (or nothing) follows the chip, snap after it regardless
+    // of which half was clicked, so the caret never lands in front of the last
+    // mention when the user clicks at the end of the input.
+    if (selection.anchorOffset <= 0 && !editableContentFollows(anchor)) return snapAfterChip(anchor)
     return selection.anchorOffset <= 0 ? snapBeforeChip(anchor) : snapAfterChip(anchor)
   }
+}
+
+function editableContentFollows(chip: HTMLElement) {
+  let node: Node | null = chip.nextSibling
+  while (node) {
+    if (node instanceof HTMLElement) return true
+    if (node instanceof Text && (node.textContent ?? "").trim().length > 0) return true
+    node = node.nextSibling
+  }
+  return false
 }
 
 function snapAfterChip(chip: HTMLElement) {
