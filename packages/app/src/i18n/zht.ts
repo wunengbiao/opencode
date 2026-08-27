@@ -925,6 +925,12 @@ export const dict = {
   "settings.general.row.mobileTitlebarBottom.description": "在行動裝置上將標題列和工作階段分頁置於畫面底部",
   "settings.general.row.showCustomAgents.title": "自訂代理程式",
   "settings.general.row.showCustomAgents.description": "在輸入區顯示代理程式選擇器",
+  "settings.general.row.proxy.title": "代理伺服器",
+  "settings.general.row.proxy.description": "透過 HTTP 或 HTTPS 代理伺服器路由對外網路請求",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "不使用代理的主機",
+  "settings.general.row.noProxy.description": "不經代理直接連線的主機，以逗號分隔",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "顯示推理摘要",
   "settings.general.row.reasoningSummaries.description": "在時間軸中顯示模型推理摘要",
 

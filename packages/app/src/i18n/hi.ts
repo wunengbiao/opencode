@@ -969,6 +969,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "एजेंट दिखाएँ",
   "settings.general.row.showCustomAgents.description":
     "कंपोज़र में एजेंट के बीच स्विच करें। छिपाए जाने पर, डिफ़ॉल्ट रूप से बिल्ड एजेंट हो जाता है।",
+  "settings.general.row.proxy.title": "प्रॉक्सी सर्वर",
+  "settings.general.row.proxy.description":
+    "आउटबाउंड नेटवर्क अनुरोधों को HTTP या HTTPS प्रॉक्सी सर्वर के माध्यम से रूट करें",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "प्रॉक्सी को बायपास करने वाले होस्ट",
+  "settings.general.row.noProxy.description": "प्रॉक्सी के बिना सीधे कनेक्ट होने वाले होस्ट, कॉमा से अलग",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "तर्क सारांश दिखाएँ",
   "settings.general.row.reasoningSummaries.description": "टाइमलाइन में मॉडल तर्क सारांश प्रदर्शित करें",
   "settings.general.row.shellToolPartsExpanded.title": "शेल टूल पार्ट्स का विस्तार करें",

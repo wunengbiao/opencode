@@ -963,6 +963,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Agent görkez",
   "settings.general.row.showCustomAgents.description":
     "Kompozitordaky agentleriň arasynda geçiň. Gizlenende, agent gurmak üçin defolt.",
+  "settings.general.row.proxy.title": "Proksi serweri",
+  "settings.general.row.proxy.description": "Çykýan tor haýyşlaryny HTTP ýa-da HTTPS proksi serweri arkaly ugradyň",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Proksiniň daşyndan geçýän hostlar",
+  "settings.general.row.noProxy.description": "Proksisiz göni birikýän hostlar, otur bilen aýrylýar",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Pikirleriň gysgaça mazmunyny görkeziň",
   "settings.general.row.reasoningSummaries.description":
     "Wagt görkezijisinde model pikirlenişiň gysgaça mazmunyny görkeziň",

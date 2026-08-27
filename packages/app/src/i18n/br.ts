@@ -886,6 +886,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Mostrar agente",
   "settings.general.row.showCustomAgents.description":
     "Alternar entre agentes na área de composição. Quando oculto, usa o agente Build como padrão.",
+  "settings.general.row.proxy.title": "Servijer proksi",
+  "settings.general.row.proxy.description": "Heñchañ azgoulennoù rouedad war-du ur servijer proksi HTTP pe HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Ostizierioù na dremen ket dre broksi",
+  "settings.general.row.noProxy.description": "Ostizierioù a gevreañ war-eeun hep ar proksi, dispartiet gant skejoù",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Mostrar resumos de raciocínio",
   "settings.general.row.reasoningSummaries.description": "Exibir resumos de raciocínio do modelo na linha do tempo",
   "settings.general.row.shellToolPartsExpanded.title": "Expandir partes da ferramenta shell",

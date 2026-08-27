@@ -967,6 +967,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Zobrazit agenta",
   "settings.general.row.showCustomAgents.description":
     "Přepínání mezi agenty ve skladateli. Když je skrytý, výchozí nastavení je Sestavit agenta.",
+  "settings.general.row.proxy.title": "Proxy server",
+  "settings.general.row.proxy.description": "Směrujte odchozí síťové požadavky přes HTTP nebo HTTPS proxy server",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hostitelé obcházející proxy",
+  "settings.general.row.noProxy.description": "Hostitelé, kteří se připojují přímo bez proxy, oddělení čárkami",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Ukažte shrnutí odůvodnění",
   "settings.general.row.reasoningSummaries.description": "Zobrazte souhrny zdůvodnění modelu na časové ose",
   "settings.general.row.shellToolPartsExpanded.title": "Rozbalte části nástroje shell",

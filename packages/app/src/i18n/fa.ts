@@ -959,6 +959,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "نشان دادن عامل",
   "settings.general.row.showCustomAgents.description":
     "بین عوامل در آهنگساز جابجا شوید. هنگامی که مخفی می شود، به طور پیش فرض بر روی Build agent قرار می گیرد.",
+  "settings.general.row.proxy.title": "سرور پروکسی",
+  "settings.general.row.proxy.description": "مسیریابی درخواست‌های شبکه خروجی از طریق سرور پروکسی HTTP یا HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "میزبان‌های دور از پروکسی",
+  "settings.general.row.noProxy.description": "میزبان‌هایی که مستقیماً بدون پروکسی متصل می‌شوند، جدا شده با کاما",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "نمایش خلاصه های استدلال",
   "settings.general.row.reasoningSummaries.description": "نمایش خلاصه های استدلال مدل در جدول زمانی",
   "settings.general.row.shellToolPartsExpanded.title": "قطعات ابزار پوسته را گسترش دهید",

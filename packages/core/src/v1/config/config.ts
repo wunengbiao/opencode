@@ -71,6 +71,20 @@ export const Info = Schema.Struct({
   enabled_providers: Schema.optional(Schema.mutable(Schema.Array(Schema.String))).annotate({
     description: "When set, ONLY these providers will be enabled. All other providers will be ignored",
   }),
+  proxy: Schema.optional(
+    Schema.Union([
+      Schema.String,
+      Schema.Struct({
+        url: Schema.String,
+        no_proxy: Schema.optional(
+          Schema.Union([Schema.String, Schema.mutable(Schema.Array(Schema.String))]),
+        ),
+      }),
+    ]),
+  ).annotate({
+    description:
+      "Proxy server URL for outbound network requests, e.g. http://127.0.0.1:7890. Object form also supports no_proxy hosts to bypass",
+  }),
   model: Schema.optional(Schema.String).annotate({
     description: "Model to use in the format of provider/model, eg anthropic/claude-2",
   }),

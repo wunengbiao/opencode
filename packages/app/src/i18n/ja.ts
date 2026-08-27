@@ -870,6 +870,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "エージェントを表示",
   "settings.general.row.showCustomAgents.description":
     "コンポーザーでエージェントを切り替えます。非表示の場合は、デフォルトでBuildエージェントが使用されます。",
+  "settings.general.row.proxy.title": "プロキシサーバー",
+  "settings.general.row.proxy.description":
+    "送信ネットワークリクエストを HTTP または HTTPS プロキシサーバー経由でルーティングします",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "プロキシをバイパスするホスト",
+  "settings.general.row.noProxy.description": "プロキシを使用せず直接接続するホスト（カンマ区切り）",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "推論の要約を表示",
   "settings.general.row.reasoningSummaries.description": "タイムラインにモデルの推論の要約を表示します",
   "settings.general.row.shellToolPartsExpanded.title": "shell ツールパーツを展開",

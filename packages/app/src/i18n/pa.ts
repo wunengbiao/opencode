@@ -966,6 +966,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "ایجنٹ وکھاؤ",
   "settings.general.row.showCustomAgents.description":
     "کمپوزر چ ایجنٹاں دے وچکار سوئچ کرو۔ جدوں لُکیا ہوندا اے، تے بلڈ ایجنٹ تے ڈیفالٹ ہوندا اے۔",
+  "settings.general.row.proxy.title": "ਪ੍ਰੌਕਸੀ ਸਰਵਰ",
+  "settings.general.row.proxy.description":
+    "ਬਾਹਰ ਜਾਂਦੀਆਂ ਨੈੱਟਵਰਕ ਬੇਨਤੀਆਂ ਨੂੰ HTTP ਜਾਂ HTTPS ਪ੍ਰੌਕਸੀ ਸਰਵਰ ਰਾਹੀਂ ਰੂਟ ਕਰੋ",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "ਪ੍ਰੌਕਸੀ ਨੂੰ ਬਾਈਪਾਸ ਕਰਨ ਵਾਲੇ ਹੋਸਟ",
+  "settings.general.row.noProxy.description": "ਪ੍ਰੌਕਸੀ ਤੋਂ ਬਿਨਾਂ ਸਿੱਧੇ ਜੁੜਨ ਵਾਲੇ ਹੋਸਟ, ਕਾਮਿਆਂ ਨਾਲ ਵੱਖ",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "استدلال دے خلاصے وکھاؤ",
   "settings.general.row.reasoningSummaries.description": "ٹائم لائن وچ ماڈل دی استدلال دے خلاصے وکھاؤ",
   "settings.general.row.shellToolPartsExpanded.title": "شیل ٹول دے حصیاں نو ودھاؤ",

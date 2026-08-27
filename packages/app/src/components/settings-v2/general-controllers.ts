@@ -72,6 +72,41 @@ export function createShellSettingsController() {
   }
 }
 
+export function createProxySettingsController() {
+  const serverSync = useServerSync()
+  const url = createMemo(() => {
+    const proxy = serverSync().data.config.proxy
+    if (proxy === undefined) return ""
+    return typeof proxy === "string" ? proxy : proxy.url
+  })
+  const noProxy = createMemo(() => {
+    const proxy = serverSync().data.config.proxy
+    if (proxy === undefined || typeof proxy === "string") return ""
+    return Array.isArray(proxy.no_proxy) ? proxy.no_proxy.join(",") : (proxy.no_proxy ?? "")
+  })
+
+  const save = (url: string, noProxy: string) => {
+    const nextUrl = url.trim()
+    const hosts = noProxy
+      .split(",")
+      .map((host) => host.trim())
+      .filter((host) => host !== "")
+    // The server merges patches, so the proxy is cleared by writing an empty
+    // string rather than deleting the key.
+    if (nextUrl === "") {
+      void serverSync().updateConfig({ proxy: "" })
+      return
+    }
+    if (hosts.length === 0) {
+      void serverSync().updateConfig({ proxy: nextUrl })
+      return
+    }
+    void serverSync().updateConfig({ proxy: { url: nextUrl, no_proxy: hosts } })
+  }
+
+  return { url, noProxy, save }
+}
+
 export function createAppearanceSettingsController() {
   const settings = useSettings()
   const theme = useTheme()
@@ -168,6 +203,7 @@ export function createSoundSettingsController() {
 }
 
 export type PermissionScopeController = ReturnType<typeof createPermissionScopeController>
+export type ProxySettingsController = ReturnType<typeof createProxySettingsController>
 export type ShellSettingsController = ReturnType<typeof createShellSettingsController>
 export type AppearanceSettingsController = ReturnType<typeof createAppearanceSettingsController>
 export type SoundSettingsController = ReturnType<typeof createSoundSettingsController>

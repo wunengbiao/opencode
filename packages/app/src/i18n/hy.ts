@@ -968,6 +968,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Ցույց տալ գործակալին",
   "settings.general.row.showCustomAgents.description":
     "Փոխարկեք կոմպոզիտորի գործակալների միջև։ Երբ թաքնված է, կանխադրված է Build agent:",
+  "settings.general.row.proxy.title": "Պրոքսի սերվեր",
+  "settings.general.row.proxy.description":
+    "Ելքային ցանցային հարցումները ուղղորդել HTTP կամ HTTPS պրոքսի սերվերի միջոցով",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Պրոքսին շրջանցող հյուրընկալողներ",
+  "settings.general.row.noProxy.description":
+    "Հյուրընկալողներ, որոնք միանում են անմիջապես՝ առանց պրոքսիի, ստորակետով բաժանված",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Ցույց տալ հիմնավորման ամփոփագրերը",
   "settings.general.row.reasoningSummaries.description": "Ցուցադրել մոդելի հիմնավորման ամփոփագրերը ժամանակացույցում",
   "settings.general.row.shellToolPartsExpanded.title": "Ընդարձակել Shell գործիքի մասերը",

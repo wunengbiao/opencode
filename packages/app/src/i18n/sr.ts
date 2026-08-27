@@ -965,6 +965,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Прикажи агента",
   "settings.general.row.showCustomAgents.description":
     "Пребацивање између агената у композитору. Када је скривено, подразумевано је Буилд агент.",
+  "settings.general.row.proxy.title": "Прокси сервер",
+  "settings.general.row.proxy.description": "Усмерите одлазне мрежне захтеве кроз HTTP или HTTPS прокси сервер",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Хостови који заобилазе прокси",
+  "settings.general.row.noProxy.description": "Хостови који се повезују директно без проксија, раздвојени зарезима",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Прикажи резимее образложења",
   "settings.general.row.reasoningSummaries.description": "Приказ резимеа образложења модела на временској линији",
   "settings.general.row.shellToolPartsExpanded.title": "Проширите shell делова алата",

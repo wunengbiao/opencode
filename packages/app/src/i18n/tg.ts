@@ -967,6 +967,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Намоиши агент",
   "settings.general.row.showCustomAgents.description":
     "Гузариш байни агентҳо дар оҳангсоз. Ҳангоми пинҳон, пешфарз ба Сохтани агент.",
+  "settings.general.row.proxy.title": "Прокси-сервер",
+  "settings.general.row.proxy.description":
+    "Дархостҳои шабакаи баромадиро тавассути прокси-сервери HTTP ё HTTPS равона кунед",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Хостҳое, ки проксиро мегузаранд",
+  "settings.general.row.noProxy.description":
+    "Хостҳое, ки бе прокси мустақим пайваст мешаванд, бо вергул ҷудо карда мешаванд",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Ҷамъбасти далелҳоро нишон диҳед",
   "settings.general.row.reasoningSummaries.description": "Дар ҷадвали вақт хулосаҳои далелҳои моделиро нишон диҳед",
   "settings.general.row.shellToolPartsExpanded.title": "Қисмҳои shell асбобро васеъ кунед",

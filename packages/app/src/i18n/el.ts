@@ -976,6 +976,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Εμφάνιση πράκτορα",
   "settings.general.row.showCustomAgents.description":
     "Εναλλαγή μεταξύ πρακτόρων στον συνθέτη. Όταν είναι κρυφό, ορίζεται από προεπιλογή Build agent.",
+  "settings.general.row.proxy.title": "Διακομιστής μεσολάβησης",
+  "settings.general.row.proxy.description":
+    "Δρομολόγηση εξερχόμενων δικτυακών αιτημάτων μέσω διακομιστή μεσολάβησης HTTP ή HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Κεντρικοί υπολογιστές παράκαμψης μεσολάβησης",
+  "settings.general.row.noProxy.description":
+    "Κεντρικοί υπολογιστές που συνδέονται απευθείας χωρίς μεσολάβηση, διαχωρισμένοι με κόμμα",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Εμφάνιση περιλήψεων συλλογισμών",
   "settings.general.row.reasoningSummaries.description": "Εμφάνιση περιλήψεων συλλογισμών μοντέλων στη γραμμή χρόνου",
   "settings.general.row.shellToolPartsExpanded.title": "Ανάπτυξη εξαρτημάτων εργαλείου κελύφους",

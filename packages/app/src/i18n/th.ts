@@ -936,6 +936,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "แสดงเอเจนต์",
   "settings.general.row.showCustomAgents.description":
     "สลับระหว่างเอเจนต์ในช่องเขียนข้อความ เมื่อซ่อน ระบบจะใช้เอเจนต์ Build เป็นค่าเริ่มต้น",
+  "settings.general.row.proxy.title": "เซิร์ฟเวอร์พร็อกซี",
+  "settings.general.row.proxy.description": "กำหนดเส้นทางคำขอเครือข่ายขาออกผ่านเซิร์ฟเวอร์พร็อกซี HTTP หรือ HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "โฮสต์ที่ข้ามพร็อกซี",
+  "settings.general.row.noProxy.description": "โฮสต์ที่เชื่อมต่อโดยตรงโดยไม่ใช้พร็อกซี คั่นด้วยจุลภาค",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "แสดงสรุปการใช้เหตุผล",
   "settings.general.row.reasoningSummaries.description": "แสดงสรุปการใช้เหตุผลของโมเดลในไทม์ไลน์",
   "settings.general.row.shellToolPartsExpanded.title": "ขยายส่วนเครื่องมือ shell",

@@ -973,6 +973,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Toon agent",
   "settings.general.row.showCustomAgents.description":
     "Schakel tussen agenten in het invoerveld. Indien verborgen wordt standaard de Build-agent gebruikt.",
+  "settings.general.row.proxy.title": "Proxyserver",
+  "settings.general.row.proxy.description": "Stuur uitgaande netwerkverzoeken via een HTTP- of HTTPS-proxyserver",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hosts die de proxy omzeilen",
+  "settings.general.row.noProxy.description":
+    "Hosts die direct verbinding maken zonder de proxy, gescheiden door komma's",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Toon redeneeroverzichten",
   "settings.general.row.reasoningSummaries.description":
     "Geef samenvattingen van modelredeneringen weer in de tijdlijn",

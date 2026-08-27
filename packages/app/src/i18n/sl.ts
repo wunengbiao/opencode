@@ -966,6 +966,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Razstavni agent",
   "settings.general.row.showCustomAgents.description":
     "Preklapljanje med agenti v skladatelju. Ko je skrit, je privzeto nastavljen na Build agent.",
+  "settings.general.row.proxy.title": "Proxy-strežnik",
+  "settings.general.row.proxy.description": "Usmerjajte odhodne omrežne zahtevke prek strežnika proxy HTTP ali HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Gostitelji, ki obidejo proxy",
+  "settings.general.row.noProxy.description": "Gostitelji, ki se povežejo neposredno brez proxyja, ločeni z vejicami",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Prikažite povzetke sklepanja",
   "settings.general.row.reasoningSummaries.description": "Prikažite povzetke sklepanja modela na časovnici",
   "settings.general.row.shellToolPartsExpanded.title": "Razširite dele orodja lupine",

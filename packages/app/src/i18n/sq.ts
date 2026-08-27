@@ -968,6 +968,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Trego agjentin",
   "settings.general.row.showCustomAgents.description":
     "Kaloni ndërmjet agjentëve në kompozitor. Kur fshihet, si parazgjedhje është Build agent.",
+  "settings.general.row.proxy.title": "Serveri ndërmjetës",
+  "settings.general.row.proxy.description":
+    "Rrugëto kërkesat e rrjetit në dalje përmes një serveri ndërmjetës HTTP ose HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hostet që anashkalojnë ndërmjetësin",
+  "settings.general.row.noProxy.description": "Hostet që lidhen drejtpërdrejt pa ndërmjetës, të ndarë me presje",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Trego përmbledhjet e arsyetimit",
   "settings.general.row.reasoningSummaries.description": "Shfaqni përmbledhjet e arsyetimit të modelit në afatin kohor",
   "settings.general.row.shellToolPartsExpanded.title": "Zgjeroni pjesët e veglave të guaskës",

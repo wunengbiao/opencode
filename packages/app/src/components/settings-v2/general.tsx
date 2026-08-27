@@ -1,4 +1,5 @@
-import { Component, Show, createMemo, createResource } from "solid-js"
+import { Component, Show, createEffect, createMemo, createResource } from "solid-js"
+import { createStore } from "solid-js/store"
 import { createMediaQuery } from "@solid-primitives/media"
 import { ButtonV2 } from "@opencode-ai/ui/v2/button-v2"
 import { SelectV2 } from "@opencode-ai/ui/v2/select-v2"
@@ -16,12 +17,14 @@ import { LayoutRetirementNotice, LayoutTransitionToggle } from "./interface-tran
 import {
   createAppearanceSettingsController,
   createPermissionScopeController,
+  createProxySettingsController,
   createShellOptions,
   createShellSettingsController,
   createSoundSettingsController,
   soundOptions,
   type AppearanceSettingsController,
   type PermissionScopeController,
+  type ProxySettingsController,
   type ShellSettingsController,
   type SoundSettingsController,
 } from "./general-controllers"
@@ -205,6 +208,68 @@ const FontSetting: Component<{
   )
 }
 
+const ProxySetting: Component<{ controller: ProxySettingsController }> = (props) => {
+  const language = useLanguage()
+  const [draft, setDraft] = createStore({
+    url: props.controller.url(),
+    noProxy: props.controller.noProxy(),
+  })
+  createEffect(() => {
+    setDraft({ url: props.controller.url(), noProxy: props.controller.noProxy() })
+  })
+  const commit = () => {
+    if (draft.url === props.controller.url() && draft.noProxy === props.controller.noProxy()) return
+    props.controller.save(draft.url, draft.noProxy)
+  }
+
+  return (
+    <>
+      <SettingsRowV2
+        title={language.t("settings.general.row.proxy.title")}
+        description={language.t("settings.general.row.proxy.description")}
+      >
+        <div class="w-full sm:w-[220px]">
+          <TextInputV2
+            data-action="settings-proxy-url"
+            type="text"
+            appearance="base"
+            value={draft.url}
+            onInput={(event) => setDraft("url", event.currentTarget.value)}
+            onBlur={commit}
+            placeholder={language.t("settings.general.row.proxy.placeholder")}
+            spellcheck={false}
+            autocorrect="off"
+            autocomplete="off"
+            autocapitalize="off"
+            aria-label={language.t("settings.general.row.proxy.title")}
+          />
+        </div>
+      </SettingsRowV2>
+      <SettingsRowV2
+        title={language.t("settings.general.row.noProxy.title")}
+        description={language.t("settings.general.row.noProxy.description")}
+      >
+        <div class="w-full sm:w-[220px]">
+          <TextInputV2
+            data-action="settings-proxy-no-proxy"
+            type="text"
+            appearance="base"
+            value={draft.noProxy}
+            onInput={(event) => setDraft("noProxy", event.currentTarget.value)}
+            onBlur={commit}
+            placeholder={language.t("settings.general.row.noProxy.placeholder")}
+            spellcheck={false}
+            autocorrect="off"
+            autocomplete="off"
+            autocapitalize="off"
+            aria-label={language.t("settings.general.row.noProxy.title")}
+          />
+        </div>
+      </SettingsRowV2>
+    </>
+  )
+}
+
 const SoundsSection: Component<{ controller: SoundSettingsController }> = (props) => {
   const language = useLanguage()
   return (
@@ -282,6 +347,7 @@ export const SettingsGeneralV2: Component<{
   const updater = useUpdaterAction()
   const permissionScope = createPermissionScopeController(() => props.sessionID)
   const shell = createShellSettingsController()
+  const proxy = createProxySettingsController()
   const appearance = createAppearanceSettingsController()
   const sounds = createSoundSettingsController()
   const desktop = createMemo(() => platform.platform === "desktop")
@@ -438,6 +504,8 @@ export const SettingsGeneralV2: Component<{
             />
           </div>
         </SettingsRowV2>
+
+        <ProxySetting controller={proxy} />
       </SettingsListV2>
     </div>
   )

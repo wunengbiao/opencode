@@ -887,6 +887,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Wybór agenta",
   "settings.general.row.showCustomAgents.description":
     "Umożliwiaj przełączanie agentów w edytorze wiadomości. Po ukryciu domyślnie używany jest agent Build.",
+  "settings.general.row.proxy.title": "Serwer proxy",
+  "settings.general.row.proxy.description": "Kieruj wychodzące żądania sieciowe przez serwer proxy HTTP lub HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hosty pomijające serwer proxy",
+  "settings.general.row.noProxy.description": "Hosty łączące się bezpośrednio bez proxy, rozdzielone przecinkami",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Pokaż podsumowania wnioskowania",
   "settings.general.row.reasoningSummaries.description": "Wyświetlaj podsumowania wnioskowania modelu na osi czasu",
   "settings.general.row.shellToolPartsExpanded.title": "Rozwijaj elementy narzędzia shell",

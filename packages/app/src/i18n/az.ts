@@ -973,6 +973,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Agenti göstər",
   "settings.general.row.showCustomAgents.description":
     "Mesaj sahəsində agentlər arasında keçid edin. Gizlədildikdə Build agenti seçilir.",
+  "settings.general.row.proxy.title": "Proksi serveri",
+  "settings.general.row.proxy.description":
+    "Çıxan şəbəkə sorğularını HTTP və ya HTTPS proksi serveri vasitəsilə yönləndirin",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Proksini bypass edən hostlar",
+  "settings.general.row.noProxy.description": "Proksisiz birbaşa qoşulan hostlar, vergüllə ayrılır",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Düşünmə xülasələrini göstər",
   "settings.general.row.reasoningSummaries.description": "Zaman xəttində modelin düşünmə xülasələrini göstər",
   "settings.general.row.shellToolPartsExpanded.title": "Shell alət hissələrini genişlət",

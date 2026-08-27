@@ -1929,6 +1929,15 @@ export type Config = {
   autoupdate?: boolean | "notify"
   disabled_providers?: Array<string>
   enabled_providers?: Array<string>
+  /**
+   * Proxy server URL for outbound network requests, e.g. http://127.0.0.1:7890. Object form also supports no_proxy hosts to bypass
+   */
+  proxy?:
+    | string
+    | {
+        url: string
+        no_proxy?: string | Array<string>
+      }
   model?: string
   small_model?: string
   default_agent?: string

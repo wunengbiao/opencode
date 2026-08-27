@@ -959,6 +959,13 @@ export const dict: Record<string, string> = {
   "settings.general.row.showCustomAgents.title": "এজেন্ট দেখান",
   "settings.general.row.showCustomAgents.description":
     "কম্পোজারে এজেন্টদের মধ্যে স্যুইচ করুন। লুকানো হলে, বিল্ড এজেন্টে ডিফল্ট।",
+  "settings.general.row.proxy.title": "প্রক্সি সার্ভার",
+  "settings.general.row.proxy.description":
+    "আউটবাউন্ড নেটওয়ার্ক অনুরোধগুলো HTTP বা HTTPS প্রক্সি সার্ভারের মাধ্যমে রুট করুন",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "প্রক্সি বাইপাস করা হোস্ট",
+  "settings.general.row.noProxy.description": "প্রক্সি ছাড়া সরাসরি সংযোগ করা হোস্ট, কমা দিয়ে আলাদা",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "যুক্তির সারাংশ দেখান",
   "settings.general.row.reasoningSummaries.description": "টাইমলাইনে মডেল যুক্তির সারাংশ প্রদর্শন করুন",
   "settings.general.row.shellToolPartsExpanded.title": "শেল টুল অংশ প্রসারিত",

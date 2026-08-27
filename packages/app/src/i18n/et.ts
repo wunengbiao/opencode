@@ -957,6 +957,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Näita agenti",
   "settings.general.row.showCustomAgents.description":
     "Helilooja agentide vahel vahetamine. Kui see on peidetud, on vaikimisi Agent.",
+  "settings.general.row.proxy.title": "Proksiserver",
+  "settings.general.row.proxy.description": "Suuna väljuvad võrgupäringud HTTP- või HTTPS-proksiserveri kaudu",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Proksit väldivad hostid",
+  "settings.general.row.noProxy.description": "Hostid, mis ühenduvad otse proksita, komadega eraldatult",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Näita põhjenduste kokkuvõtteid",
   "settings.general.row.reasoningSummaries.description": "Kuva mudeli arutluskäigu kokkuvõtted ajaskaalal",
   "settings.general.row.shellToolPartsExpanded.title": "Laienda shellitööriista osi",

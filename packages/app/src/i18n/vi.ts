@@ -974,6 +974,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Hiển thị tác nhân",
   "settings.general.row.showCustomAgents.description":
     "Chuyển đổi giữa các tác nhân trong trình soạn thảo. Khi ẩn, tác nhân mặc định là Build.",
+  "settings.general.row.proxy.title": "Máy chủ proxy",
+  "settings.general.row.proxy.description": "Định tuyến các yêu cầu mạng đi qua máy chủ proxy HTTP hoặc HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Host bỏ qua proxy",
+  "settings.general.row.noProxy.description": "Host kết nối trực tiếp không qua proxy, phân tách bằng dấu phẩy",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Hiển thị tóm tắt lý luận",
   "settings.general.row.reasoningSummaries.description": "Hiển thị tóm tắt lý luận mô hình trong dòng thời gian",
   "settings.general.row.shellToolPartsExpanded.title": "Mở rộng các phần của công cụ shell",

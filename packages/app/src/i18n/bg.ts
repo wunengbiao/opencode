@@ -970,6 +970,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Показване на агента",
   "settings.general.row.showCustomAgents.description":
     "Превключвайте между агенти в композитора. Когато е скрит, по подразбиране е Build agent.",
+  "settings.general.row.proxy.title": "Прокси сървър",
+  "settings.general.row.proxy.description":
+    "Маршрутизиране на изходящите мрежови заявки през HTTP или HTTPS прокси сървър",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Хостове, които заобикалят проксито",
+  "settings.general.row.noProxy.description": "Хостове, които се свързват директно без прокси, разделени със запетаи",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Показване на обобщения на разсъжденията",
   "settings.general.row.reasoningSummaries.description":
     "Показване на обобщения на разсъжденията на модела във времевата линия",

@@ -1042,6 +1042,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Tampilkan agen",
   "settings.general.row.showCustomAgents.description":
     "Beralih antaragen di penyusun. Saat disembunyikan, Agen Build digunakan sebagai bawaan.",
+  "settings.general.row.proxy.title": "Server proxy",
+  "settings.general.row.proxy.description": "Rutekan permintaan jaringan keluar melalui server proxy HTTP atau HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Host yang melewati proxy",
+  "settings.general.row.noProxy.description": "Host yang terhubung langsung tanpa proxy, dipisahkan dengan koma",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Tampilkan ringkasan penalaran",
   "settings.general.row.reasoningSummaries.description": "Tampilkan ringkasan penalaran model di linimasa",
   "settings.general.row.shellToolPartsExpanded.title": "Bentangkan bagian alat shell",

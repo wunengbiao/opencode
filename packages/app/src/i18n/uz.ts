@@ -972,6 +972,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Agentni ko'rsatish",
   "settings.general.row.showCustomAgents.description":
     "Kompozitorda agentlar o'rtasida almashish. Yashirin bo'lsa, birlamchi Build agenti bo'ladi.",
+  "settings.general.row.proxy.title": "Proksi serveri",
+  "settings.general.row.proxy.description":
+    "Chiquvchi tarmoq so'rovlarini HTTP yoki HTTPS proksi serveri orqali yo'naltiring",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Proksini chetlab o'tuvchi hostlar",
+  "settings.general.row.noProxy.description":
+    "Proksisiz to'g'ridan-to'g'ri ulanadigan hostlar, vergul bilan ajratilgan",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Fikrlash xulosalarini ko'rsating",
   "settings.general.row.reasoningSummaries.description": "Vaqt jadvalida model asoslarini ko'rsatish",
   "settings.general.row.shellToolPartsExpanded.title": "Qobiq asboblari qismlarini kengaytiring",

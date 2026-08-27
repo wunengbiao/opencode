@@ -961,6 +961,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "აგენტის ჩვენება",
   "settings.general.row.showCustomAgents.description":
     "გადართვა კომპოზიტორში აგენტებს შორის. როდესაც დამალულია, ნაგულისხმევად არის Build აგენტი.",
+  "settings.general.row.proxy.title": "პროქსი სერვერი",
+  "settings.general.row.proxy.description":
+    "გამავალი ქსელური მოთხოვნების როუტინგი HTTP ან HTTPS პროქსი სერვერის საშუალებით",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "პროქსის შემოვლებადი ჰოსტები",
+  "settings.general.row.noProxy.description":
+    "ჰოსტები, რომლებიც პროქსის გარეშე პირდაპირ უკავშირდებიან, მძიმით გამოყოფილი",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "მსჯელობის შეჯამების ჩვენება",
   "settings.general.row.reasoningSummaries.description": "მოდელების მსჯელობის რეზიუმეების ჩვენება ვადებში",
   "settings.general.row.shellToolPartsExpanded.title": "Shell ხელსაწყოს ნაწილების გაფართოება",

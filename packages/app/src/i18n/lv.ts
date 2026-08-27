@@ -967,6 +967,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Rādīt aģentu",
   "settings.general.row.showCustomAgents.description":
     "Pārslēgties starp aģentiem redaktorā. Ja paslēpts, tiek izmantots Build aģents.",
+  "settings.general.row.proxy.title": "Starpserveris",
+  "settings.general.row.proxy.description":
+    "Maršrutējiet izejošos tīkla pieprasījumus caur HTTP vai HTTPS starpserveri",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Resursdatori, kas apiet starpserveri",
+  "settings.general.row.noProxy.description":
+    "Resursdatori, kas izveido tiešu savienojumu bez starpservera, atdalīti ar komatiem",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Rādīt pamatojuma kopsavilkumus",
   "settings.general.row.reasoningSummaries.description": "Rādīt modeļa pamatojuma kopsavilkumus laika joslā",
   "settings.general.row.shellToolPartsExpanded.title": "Izvērst čaulas rīka daļas",

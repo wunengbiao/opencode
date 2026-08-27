@@ -977,6 +977,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "ޝޯ އޭޖެންޓް",
   "settings.general.row.showCustomAgents.description":
     "ކޮމްޕޯސަރުގައި ތިބި އޭޖެންޓުންގެ މެދުގައި ބަދަލުވުން. ފޮރުވާއިރު، ޑިފޯލްޓް ވާނީ ބިލްޑް އޭޖެންޓަށެވެ.",
+  "settings.general.row.proxy.title": "ޕްރޮކްސީ ސަރުވަރު",
+  "settings.general.row.proxy.description":
+    "ބޭރަށް ފޮނުވާ ނެޓްވޯކް އިންތުތައް HTTP ނުވަތައު HTTPS ޕްރޮކްސީ ސަރުވަރެއް މެދުން ރޫޓް ކުރޭ",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "ޕްރޮކްސީ ނުބޭނުންކުރާ ހޯސްޓްތައް",
+  "settings.general.row.noProxy.description": "ޕްރޮކްސީ އެއްނުލައި ސީދާ ގުޅޭ ހޯސްޓްތައް، ކޮމާ އިން ވަކިކުރައްވާ",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "ރިޒަނިންގ ސުމާރީސް ދައްކާށެވެ",
   "settings.general.row.reasoningSummaries.description": "ޓައިމްލައިންގައި މޮޑެލް ރިޒަނިންގ ސުމާރީތައް ދައްކާލުން",
   "settings.general.row.shellToolPartsExpanded.title": "ޝެލް ޓޫލް ބައިތައް ފުޅާކުރުން",

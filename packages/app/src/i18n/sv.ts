@@ -966,6 +966,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Visa agent",
   "settings.general.row.showCustomAgents.description":
     "Växla mellan agenter i inmatningsfältet. När alternativet är dolt används agenten Bygg som standard.",
+  "settings.general.row.proxy.title": "Proxyserver",
+  "settings.general.row.proxy.description": "Rutta utgående nätverksförfrågningar via en HTTP- eller HTTPS-proxyserver",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Värdar som kringgår proxyn",
+  "settings.general.row.noProxy.description": "Värdar som ansluter direkt utan proxy, separerade med kommatecken",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Visa resonemangssammanfattningar",
   "settings.general.row.reasoningSummaries.description": "Visa modellresonemangssammanfattningar i tidslinjen",
   "settings.general.row.shellToolPartsExpanded.title": "Expandera skalverktygsdelar",

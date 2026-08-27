@@ -969,6 +969,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Покажи агент",
   "settings.general.row.showCustomAgents.description":
     "Префрлете се помеѓу агенти во композиторот. Кога е скриено, стандардно е Build agent.",
+  "settings.general.row.proxy.title": "Прокси сервер",
+  "settings.general.row.proxy.description": "Насочувајте ги излезните мрежни барања преку HTTP или HTTPS прокси сервер",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Хостови што го заобиколуваат проксито",
+  "settings.general.row.noProxy.description": "Хостови што се поврзуваат директно без прокси, одделени со запирки",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Прикажи резимеа за расудување",
   "settings.general.row.reasoningSummaries.description":
     "Прикажи резимеа на расудувањето на моделите во временската линија",

@@ -954,6 +954,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "ສະແດງຕົວແທນ",
   "settings.general.row.showCustomAgents.description":
     "ສະຫຼັບລະຫວ່າງຕົວແທນໃນຕົວປະກອບ. ເມື່ອຖືກເຊື່ອງໄວ້, ເລີ່ມຕົ້ນທີ່ຈະສ້າງຕົວແທນ.",
+  "settings.general.row.proxy.title": "ເຄື່ອງແມ່ຂ່າຍພຣັອກຊີ",
+  "settings.general.row.proxy.description":
+    "ກຳນົດເສັ້ນທາງຄຳຮ້ອງຂໍເຄືອຂ່າຍຂາອອກ ຜ່ານເຄື່ອງແມ່ຂ່າຍພຣັອກຊີ HTTP ຫຼື HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "ໂຮສຕ໌ທີ່ບໍ່ຜ່ານພຣັອກຊີ",
+  "settings.general.row.noProxy.description": "ໂຮສຕ໌ທີ່ເຊື່ອມຕໍ່ໂດຍກົງໂດຍບໍ່ມີພຣັອກຊີ ແຍກດ້ວຍເຄື່ອງໝາຍຈຸດ",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "ສະແດງການສັງລວມເຫດຜົນ",
   "settings.general.row.reasoningSummaries.description": "ສະແດງສະຫຼຸບເຫດຜົນຂອງຕົວແບບໃນທາມລາຍ",
   "settings.general.row.shellToolPartsExpanded.title": "ຂະຫຍາຍສ່ວນຂອງເຄື່ອງມື Shell",

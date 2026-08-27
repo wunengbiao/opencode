@@ -943,6 +943,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Show agent",
   "settings.general.row.showCustomAgents.description":
     "Switch between agents in the composer. When hidden, defaults to Build agent.",
+  "settings.general.row.proxy.title": "Proxy server",
+  "settings.general.row.proxy.description": "Route outbound network requests through an HTTP or HTTPS proxy server",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Proxy bypass hosts",
+  "settings.general.row.noProxy.description": "Hosts that connect directly without the proxy, comma-separated",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Show reasoning summaries",
   "settings.general.row.reasoningSummaries.description": "Display model reasoning summaries in the timeline",
   "settings.general.row.shellToolPartsExpanded.title": "Expand shell tool parts",

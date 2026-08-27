@@ -966,6 +966,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Afișează agentul",
   "settings.general.row.showCustomAgents.description":
     "Comută între agenți în editor. Când este ascuns, se folosește agentul Build.",
+  "settings.general.row.proxy.title": "Server proxy",
+  "settings.general.row.proxy.description":
+    "Direcționează cererile de rețea de ieșire printr-un server proxy HTTP sau HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Gazde care ocolesc proxy-ul",
+  "settings.general.row.noProxy.description": "Gazde care se conectează direct fără proxy, separate prin virgule",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Afișează rezumatele de raționament",
   "settings.general.row.reasoningSummaries.description":
     "Afișează rezumatele de raționament ale modelului în cronologie",

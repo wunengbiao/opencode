@@ -976,6 +976,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "အေးဂျင့်ကို ပြပါ။",
   "settings.general.row.showCustomAgents.description":
     "တေးရေးဆရာရှိ အေးဂျင့်များအကြား ပြောင်းပါ။ ဝှက်ထားသည့်အခါ၊ Build အေးဂျင့်အဖြစ် သတ်မှတ်သည်။",
+  "settings.general.row.proxy.title": "ပရောက်စီဆာဗာ",
+  "settings.general.row.proxy.description":
+    "သွားရောက်ကွန်ရက်တောင်းဆိုမှုများကို HTTP သို့မဟုတ် HTTPS ပရောက်စီဆာဗာမှတဆင့် လမ်းကြောင်းသတ်မှတ်ပါ",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "ပရောက်စီကို ကျော်လွန်သည့် ဟိုစ်များ",
+  "settings.general.row.noProxy.description":
+    "ပရောက်စီမရှိဘဲ တိုက်ရိုက်ဆက်သွယ်သည့် ဟိုစ်များ၊ ကော်မာဖြင့် ခွဲခြားထားသည်",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "ကျိုးကြောင်းဆင်ခြင်ခြင်း အနှစ်ချုပ်များကို ပြပါ။",
   "settings.general.row.reasoningSummaries.description":
     "အချိန်ဇယားတွင် မော်ဒယ် ကျိုးကြောင်းဆင်ခြင်ခြင်း အနှစ်ချုပ်များကို ပြသပါ။",

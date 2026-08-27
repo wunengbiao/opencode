@@ -1253,6 +1253,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Vis agent",
   "settings.general.row.showCustomAgents.description":
     "Bytt mellom agenter i skrivefeltet. Når velgeren er skjult, brukes Build-agenten som standard.",
+  "settings.general.row.proxy.title": "Mellomtjener",
+  "settings.general.row.proxy.description":
+    "Send utgående nettverksforespørsler gjennom en HTTP- eller HTTPS-mellomtjener",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Verter som omgår mellomtjeneren",
+  "settings.general.row.noProxy.description": "Verter som kobler til direkte uten mellomtjeneren, adskilt med komma",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.newInterface.title": "Nytt oppsett",
   "settings.general.row.newInterface.badge": "Ny",
   "settings.general.row.newInterface.description":

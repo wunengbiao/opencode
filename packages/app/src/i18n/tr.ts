@@ -956,6 +956,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Ajanı göster",
   "settings.general.row.showCustomAgents.description":
     "Düzenleyicide ajanlar arasında geçiş yapın. Gizlendiğinde varsayılan olarak Build ajanı kullanılır.",
+  "settings.general.row.proxy.title": "Proxy sunucusu",
+  "settings.general.row.proxy.description":
+    "Giden ağ isteklerini bir HTTP veya HTTPS proxy sunucusu üzerinden yönlendir",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Proxy'yi atlayan konaklar",
+  "settings.general.row.noProxy.description": "Proxy olmadan doğrudan bağlanan konaklar, virgülle ayrılmış",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Akıl yürütme özetlerini göster",
   "settings.general.row.reasoningSummaries.description": "Zaman çizelgesinde model akıl yürütme özetlerini görüntüle",
   "settings.general.row.shellToolPartsExpanded.title": "Kabuk araç bileşenlerini genişlet",

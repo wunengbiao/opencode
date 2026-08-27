@@ -779,6 +779,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Agent anzeigen",
   "settings.general.row.showCustomAgents.description":
     "Im Eingabebereich zwischen Agenten wechseln. Ist die Auswahl ausgeblendet, wird standardmäßig der Build-Agent verwendet.",
+  "settings.general.row.proxy.title": "Proxy-Server",
+  "settings.general.row.proxy.description":
+    "Ausgehende Netzwerkanfragen über einen HTTP- oder HTTPS-Proxy-Server leiten",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hosts, die den Proxy umgehen",
+  "settings.general.row.noProxy.description":
+    "Hosts, die eine direkte Verbindung ohne Proxy nutzen, durch Kommas getrennt",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Reasoning-Zusammenfassungen anzeigen",
   "settings.general.row.reasoningSummaries.description":
     "Zusammenfassungen des Modell-Reasonings in der Timeline anzeigen",

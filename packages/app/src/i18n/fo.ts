@@ -960,6 +960,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Vís agentar",
   "settings.general.row.showCustomAgents.description":
     "Skift millum agentar í tónaskaldinum. Tá ið tað er fjalt, er tað forsett til Build agent.",
+  "settings.general.row.proxy.title": "Proxytænari",
+  "settings.general.row.proxy.description":
+    "Send útgangandi netverksfyrispurningar gjøgnum ein HTTP- ella HTTPS-proxytænara",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Vertir, ið umganga proxytænaran",
+  "settings.general.row.noProxy.description": "Vertir, ið sambinda beinleiðis uttan proxy, skildir við komma",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Vís grundgevingarsamantektir",
   "settings.general.row.reasoningSummaries.description": "Vís modellgrundgevingarsamantektir í tíðarlinjuni",
   "settings.general.row.shellToolPartsExpanded.title": "Víðka shell-tólpartar",

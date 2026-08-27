@@ -976,6 +976,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Rodyti agentą",
   "settings.general.row.showCustomAgents.description":
     "Perjunkite tarp kompozitoriaus agentų. Kai paslėpta, numatytasis kūrimo agentas.",
+  "settings.general.row.proxy.title": "Įgaliotasis serveris",
+  "settings.general.row.proxy.description":
+    "Nukreipkite išsiunčiamus tinklo užklausas per HTTP arba HTTPS įgaliotąjį serverį",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hostai, apeinantys proxy",
+  "settings.general.row.noProxy.description": "Hostai, jungiantys tiesiogiai be proxy, atskirti kableliais",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Rodyti samprotavimų santraukas",
   "settings.general.row.reasoningSummaries.description": "Rodyti modelio motyvų santraukas laiko juostoje",
   "settings.general.row.shellToolPartsExpanded.title": "Išskleiskite apvalkalo įrankių dalis",

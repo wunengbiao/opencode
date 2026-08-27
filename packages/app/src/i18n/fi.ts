@@ -862,6 +862,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Näytä agentin valinta",
   "settings.general.row.showCustomAgents.description":
     "Vaihda agenttien välillä viestikentässä. Kun valinta on piilotettu, Build-agenttia käytetään oletuksena.",
+  "settings.general.row.proxy.title": "Välityspalvelin",
+  "settings.general.row.proxy.description": "Reititä lähtevät verkkopyynnöt HTTP- tai HTTPS-välityspalvelimen kautta",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Isäntäkoneet, jotka ohittavat välityspalvelimen",
+  "settings.general.row.noProxy.description":
+    "Isäntäkoneet, jotka yhdistävät suoraan ilman välityspalvelinta, pilkuilla erotettuna",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Näytä päättelyn yhteenvedot",
   "settings.general.row.reasoningSummaries.description": "Näytä mallin päättelyn yhteenvedot aikajanalla",
   "settings.general.row.shellToolPartsExpanded.title": "Laajenna shell-työkalun osat",

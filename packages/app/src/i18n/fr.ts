@@ -892,6 +892,14 @@ export const dict = {
     "Placer la barre de titre et les onglets de session en bas de l'écran sur mobile",
   "settings.general.row.showCustomAgents.title": "Agents personnalisés",
   "settings.general.row.showCustomAgents.description": "Afficher le sélecteur d'agent dans la zone de saisie",
+  "settings.general.row.proxy.title": "Serveur proxy",
+  "settings.general.row.proxy.description":
+    "Acheminer les requêtes réseau sortantes via un serveur proxy HTTP ou HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hôtes contournant le proxy",
+  "settings.general.row.noProxy.description":
+    "Hôtes qui se connectent directement sans le proxy, séparés par des virgules",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Afficher les résumés de raisonnement",
   "settings.general.row.reasoningSummaries.description":
     "Afficher les résumés de raisonnement du modèle dans la chronologie",

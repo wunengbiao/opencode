@@ -949,6 +949,12 @@ export const dict = {
     "Postavi naslovnu traku i kartice sesije na dno ekrana na mobilnim uređajima",
   "settings.general.row.showCustomAgents.title": "Prilagođeni agenti",
   "settings.general.row.showCustomAgents.description": "Prikaži izbor agenta u uređivaču poruke",
+  "settings.general.row.proxy.title": "Proxy poslužitelj",
+  "settings.general.row.proxy.description": "Usmjeri odlazne mrežne zahtjeve kroz HTTP ili HTTPS proxy poslužitelj",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hostovi koji zaobilaze proxy",
+  "settings.general.row.noProxy.description": "Hostovi koji se povezuju direktno bez proxyja, odvojeni zarezima",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Prikaži sažetke rasuđivanja",
   "settings.general.row.reasoningSummaries.description": "Prikaži sažetke rasuđivanja modela na vremenskoj traci",
 

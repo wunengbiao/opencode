@@ -971,6 +971,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Агентийг харуулах",
   "settings.general.row.showCustomAgents.description":
     "Хөгжмийн зохиолч дахь агентуудын хооронд шилжих. Нуусан үед өгөгдмөл нь Build agent.",
+  "settings.general.row.proxy.title": "Прокси сервер",
+  "settings.general.row.proxy.description":
+    "Гарах сүлжээний хүсэлтүүдийг HTTP эсвэл HTTPS прокси серверээр дамжуулан чиглүүлэх",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Проксыг тойрох хостууд",
+  "settings.general.row.noProxy.description": "Проксгүй шууд холбогдох хостууд, таслалаар тусгаарласан",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Шалтгаануудын хураангуйг харуул",
   "settings.general.row.reasoningSummaries.description": "Загварын үндэслэлийн хураангуйг цагийн хуваарьт харуул",
   "settings.general.row.shellToolPartsExpanded.title": "shell хэрэгслийн хэсгүүдийг өргөжүүлэх",

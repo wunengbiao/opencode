@@ -972,6 +972,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Prikaži agenta",
   "settings.general.row.showCustomAgents.description":
     "Prebacivanje između agenata u skladatelju. Kada je skriven, zadana je Build agent.",
+  "settings.general.row.proxy.title": "Proxy poslužitelj",
+  "settings.general.row.proxy.description": "Usmjeri izlazne mrežne zahtjeve kroz HTTP ili HTTPS proxy poslužitelj",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hostovi koji zaobilaze proxy",
+  "settings.general.row.noProxy.description": "Hostovi koji se povezuju izravno bez proxyja, odvojeni zarezima",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Prikaži sažetke obrazloženja",
   "settings.general.row.reasoningSummaries.description": "Prikažite sažetke obrazloženja modela na vremenskoj traci",
   "settings.general.row.shellToolPartsExpanded.title": "Proširite dijelove alata školjke",

@@ -1058,6 +1058,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Показувати агента",
   "settings.general.row.showCustomAgents.description":
     "Перемикатися між агентами в редакторі запиту. Якщо приховано, типовим є агент Build.",
+  "settings.general.row.proxy.title": "Проксі-сервер",
+  "settings.general.row.proxy.description": "Спрямовувати вихідні мережеві запити через HTTP- або HTTPS-проксі-сервер",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Вузли, що обходять проксі-сервер",
+  "settings.general.row.noProxy.description": "Вузли, які з'єднуються напряму без проксі-сервера, розділені комами",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Показувати підсумки мислення",
   "settings.general.row.reasoningSummaries.description": "Відображати підсумки мислення моделі на часовій шкалі",
   "settings.general.row.shellToolPartsExpanded.title": "Розгортати частини інструменту оболонки",

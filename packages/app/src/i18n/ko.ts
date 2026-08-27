@@ -1038,6 +1038,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "에이전트 표시",
   "settings.general.row.showCustomAgents.description":
     "입력창에서 에이전트를 전환합니다. 숨기면 기본적으로 Build 에이전트를 사용합니다.",
+  "settings.general.row.proxy.title": "프록시 서버",
+  "settings.general.row.proxy.description":
+    "아웃바운드 네트워크 요청을 HTTP 또는 HTTPS 프록시 서버를 통해 라우팅합니다",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "프록시를 우회하는 호스트",
+  "settings.general.row.noProxy.description": "프록시 없이 직접 연결하는 호스트, 쉼표로 구분",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.newInterface.title": "새 레이아웃",
   "settings.general.row.newInterface.badge": "신규",
   "settings.general.row.newInterface.description":

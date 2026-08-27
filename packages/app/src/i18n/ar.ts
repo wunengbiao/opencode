@@ -881,6 +881,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "إظهار الوكيل",
   "settings.general.row.showCustomAgents.description":
     "التبديل بين الوكلاء في محرر الرسائل. عند إخفائه، يُستخدم وكيل Build افتراضيًا.",
+  "settings.general.row.proxy.title": "خادم الوكيل",
+  "settings.general.row.proxy.description": "توجيه طلبات الشبكة الصادرة عبر خادم وكيل HTTP أو HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "المضيفات التي تتجاوز الوكيل",
+  "settings.general.row.noProxy.description": "المضيفات التي تتصل مباشرة بدون الوكيل، مفصولة بفواصل",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "إظهار ملخصات الاستدلال",
   "settings.general.row.reasoningSummaries.description": "عرض ملخصات استدلال النموذج في الشريط الزمني",
   "settings.general.row.shellToolPartsExpanded.title": "توسيع أجزاء أداة shell",

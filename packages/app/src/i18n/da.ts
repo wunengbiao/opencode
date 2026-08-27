@@ -826,6 +826,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Vis agent",
   "settings.general.row.showCustomAgents.description":
     "Skift mellem agenter i promptfeltet. Når vælgeren er skjult, bruges Build-agenten som standard.",
+  "settings.general.row.proxy.title": "Proxyserver",
+  "settings.general.row.proxy.description": "Send udgående netværksanmodninger gennem en HTTP- eller HTTPS-proxyserver",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hosts, der omgår proxyen",
+  "settings.general.row.noProxy.description":
+    "Hosts, der opretter forbindelse direkte uden proxyen, adskilt med kommaer",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Vis ræsonneringsoversigter",
   "settings.general.row.reasoningSummaries.description": "Vis oversigter over modellens ræsonnering på tidslinjen",
 

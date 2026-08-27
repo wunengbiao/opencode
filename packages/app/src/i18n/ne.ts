@@ -961,6 +961,13 @@ export const dict: Record<string, string> = {
   "settings.general.row.showCustomAgents.title": "एजेन्ट देखाउनुहोस्",
   "settings.general.row.showCustomAgents.description":
     "कम्पोजरमा एजेन्टहरू बीच स्विच गर्नुहोस्। लुकेको बेला, बिल्ड एजेन्टमा पूर्वनिर्धारित हुन्छ।",
+  "settings.general.row.proxy.title": "प्रोक्सी सर्भर",
+  "settings.general.row.proxy.description":
+    "बाहिर जाने नेटवर्क अनुरोधहरूलाई HTTP वा HTTPS प्रोक्सी सर्भरमार्फत रुट गर्नुहोस्",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "प्रोक्सी बाइपास गर्ने होस्टहरू",
+  "settings.general.row.noProxy.description": "प्रोक्सी बिना सिधै जडान हुने होस्टहरू, अल्पविरामले छुट्याइएको",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "तर्क सारांशहरू देखाउनुहोस्",
   "settings.general.row.reasoningSummaries.description": "टाइमलाइनमा मोडेल तर्क सारांशहरू प्रदर्शन गर्नुहोस्",
   "settings.general.row.shellToolPartsExpanded.title": "शेल उपकरणका भागहरू विस्तार गर्नुहोस्",

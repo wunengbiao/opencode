@@ -953,6 +953,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Выбор агента",
   "settings.general.row.showCustomAgents.description":
     "Показывать переключатель агентов в редакторе запросов. Если он скрыт, по умолчанию используется агент Build.",
+  "settings.general.row.proxy.title": "Прокси-сервер",
+  "settings.general.row.proxy.description":
+    "Маршрутизация исходящих сетевых запросов через прокси-сервер HTTP или HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Хосты, обходящие прокси-сервер",
+  "settings.general.row.noProxy.description": "Хосты, подключающиеся напрямую без прокси-сервера, через запятую",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Показывать сводки рассуждений",
   "settings.general.row.reasoningSummaries.description": "Отображать сводки рассуждений модели в ленте",
 

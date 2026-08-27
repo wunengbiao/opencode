@@ -961,6 +961,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Papar ejen",
   "settings.general.row.showCustomAgents.description":
     "Tukar antara ejen dalam penyusun. Jika disembunyikan, lalai kepada ejen Build.",
+  "settings.general.row.proxy.title": "Pelayan proksi",
+  "settings.general.row.proxy.description":
+    "Lalukan permintaan rangkaian keluar melalui pelayan proksi HTTP atau HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hos yang memintas proksi",
+  "settings.general.row.noProxy.description": "Hos yang bersambung terus tanpa proksi, dipisahkan dengan koma",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Papar ringkasan penaakulan",
   "settings.general.row.reasoningSummaries.description": "Papar ringkasan penaakulan model dalam garis masa",
   "settings.general.row.shellToolPartsExpanded.title": "Kembangkan bahagian alat shell",

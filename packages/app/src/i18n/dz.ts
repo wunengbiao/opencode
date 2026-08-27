@@ -980,6 +980,13 @@ export const dict: Record<string, string> = {
   "settings.general.row.showCustomAgents.title": "ལས་ཚབ་སྟོན།",
   "settings.general.row.showCustomAgents.description":
     "བརྩམ་མི་ནང་ལུ་ ལས་ཚབ་ཚུ་གི་བར་ན་ སོར་བསྒྱུར་འབད། སྦ་བཞག་པའི་སྐབས་ བཟོ་བསྐྲུན་ལས་ཚབ་ལུ་སྔོན་སྒྲིག་འབདཝ་ཨིན།",
+  "settings.general.row.proxy.title": "པོ་རོག་སི་སར་བར།",
+  "settings.general.row.proxy.description":
+    "ཕྱིར་འགྲོ་བའི་ནེཊ་ཝརཀ་ཞུ་བ་ཚུ་ HTTP ཡང་ན་ HTTPS པོ་རོག་སི་སར་བར་གྱི་ཐོག་ལས་ལམ་བཀོད་འབད།",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "པོ་རོག་སི་ལག་ལེན་མི་སྤྲོད་མི་ཧོསཊི་ཚུ།",
+  "settings.general.row.noProxy.description": "པོ་རོག་སི་མེད་པར་ཐད་ཀར་མཐུད་མི་ཧོསཊི་ཚུ། ཀོ་མ་གིས་སོ་སོ་བཀོད་དེ་ཡོད།",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "རྒྱུ་མཚན་བཅུད་བསྡུས་ཚུ་སྟོན།",
   "settings.general.row.reasoningSummaries.description":
     "དུས་ཚོད་གྲལ་ཐིག་ནང་དཔེ་ཚད་དོན་དག་བཅུད་བསྡུས་ཚུ་བཀྲམ་སྟོན་འབད།",

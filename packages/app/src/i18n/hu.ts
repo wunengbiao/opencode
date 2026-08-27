@@ -971,6 +971,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Mutasd az ügynököt",
   "settings.general.row.showCustomAgents.description":
     "Váltás az ágensek között a zeneszerzőben. Ha rejtett, alapértelmezés szerint Build agent.",
+  "settings.general.row.proxy.title": "Proxykiszolgáló",
+  "settings.general.row.proxy.description":
+    "Kimenő hálózati kérések irányítása HTTP- vagy HTTPS-proxykiszolgálón keresztül",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "A proxyt megkerülő gazdagépek",
+  "settings.general.row.noProxy.description":
+    "Gazdagépek, amelyek proxy nélkül közvetlenül csatlakoznak, vesszővel elválasztva",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Mutasson érvelési összefoglalókat",
   "settings.general.row.reasoningSummaries.description": "Modell indoklási összefoglalók megjelenítése az idővonalon",
   "settings.general.row.shellToolPartsExpanded.title": "Shelleszköz részeinek kibontása",

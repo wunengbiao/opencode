@@ -963,6 +963,12 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Sýna fulltrúa",
   "settings.general.row.showCustomAgents.description":
     "Skiptu á milli fulltrúa í innsláttarreitnum. Þegar þeir eru faldir er Build-fulltrúinn sjálfgefinn.",
+  "settings.general.row.proxy.title": "Milliþjónn",
+  "settings.general.row.proxy.description": "Beindu útgangandi netfyrirspurnum í gegnum HTTP- eða HTTPS-milliþjón",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Vélar sem sleppa milliþjóninum",
+  "settings.general.row.noProxy.description": "Vélar sem tengjast beint án milliþjóns, aðgreindar með kommum",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Sýndu samantektir um rökstuðning",
   "settings.general.row.reasoningSummaries.description": "Birta rökstuðningssamantektir líkana á tímalínunni",
   "settings.general.row.shellToolPartsExpanded.title": "Stækkaðu hluta skeljaverkfæra",

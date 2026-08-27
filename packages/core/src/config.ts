@@ -54,6 +54,18 @@ export class Info extends Schema.Class<Info>("Config.Info")({
     .annotate({
       description: "Enterprise sharing service configuration",
     }),
+  proxy: Schema.Union([
+    Schema.String,
+    Schema.Struct({
+      url: Schema.String,
+      no_proxy: Schema.Union([Schema.String, Schema.String.pipe(Schema.Array)]).pipe(Schema.optional),
+    }),
+  ])
+    .pipe(Schema.optional)
+    .annotate({
+      description:
+        "Proxy server URL for outbound network requests, e.g. http://127.0.0.1:7890. Object form also supports no_proxy hosts to bypass",
+    }),
   username: Schema.String.pipe(Schema.optional).annotate({
     description: "Username displayed in conversations and used for telemetry identity",
   }),

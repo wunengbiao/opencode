@@ -965,6 +965,13 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Zobraziť agenta",
   "settings.general.row.showCustomAgents.description":
     "Prepínať medzi agentmi v editore. Ak je skryté, predvolený je Build agent.",
+  "settings.general.row.proxy.title": "Proxy server",
+  "settings.general.row.proxy.description":
+    "Smerujte odchádzajúce sieťové požiadavky cez HTTP alebo HTTPS proxy server",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Hostia, ktorí obchádzajú proxy",
+  "settings.general.row.noProxy.description": "Hostia, ktorí sa pripájajú priamo bez proxy, oddelení čiarkami",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Zobraziť súhrny uvažovania",
   "settings.general.row.reasoningSummaries.description": "Zobrazovať súhrny uvažovania modelu v časovej osi",
   "settings.general.row.shellToolPartsExpanded.title": "Rozbaliť časti shell nástroja",

@@ -972,6 +972,14 @@ export const dict = {
   "settings.general.row.showCustomAgents.title": "Agent d'espectacles",
   "settings.general.row.showCustomAgents.description":
     "Canvia entre agents del compositor. Quan s'amaga, el valor predeterminat és Build agent.",
+  "settings.general.row.proxy.title": "Servidor intermediari",
+  "settings.general.row.proxy.description":
+    "Encamina les peticions de xarxa de sortida a través d'un servidor intermediari HTTP o HTTPS",
+  "settings.general.row.proxy.placeholder": "http://127.0.0.1:7890",
+  "settings.general.row.noProxy.title": "Amfitrions que ometen el servidor intermediari",
+  "settings.general.row.noProxy.description":
+    "Amfitrions que es connecten directament sense intermediari, separats per comes",
+  "settings.general.row.noProxy.placeholder": "internal.example.com,api.internal",
   "settings.general.row.reasoningSummaries.title": "Mostra resums de raonament",
   "settings.general.row.reasoningSummaries.description": "Mostra els resums de raonament del model a la línia de temps",
   "settings.general.row.shellToolPartsExpanded.title": "Amplieu les peces de l'eina de closca",
