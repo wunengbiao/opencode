@@ -20,6 +20,10 @@ export interface Interface {
 
 export class Service extends Context.Service<Service, Interface>()("@opencode/v2/FileSystem/Search") {}
 
+// A watcher cannot replicate rg's gitignore/hidden-file semantics, so find() lazily re-runs rg --files
+// in the background when the index is older than this.
+const RESCAN_INTERVAL_MS = 5_000
+
 export const ripgrepLayer = Layer.effect(
   Service,
   Effect.gen(function* () {
@@ -31,21 +35,42 @@ export const ripgrepLayer = Layer.effect(
       files: [] as string[],
       directories: [] as string[],
     }
-    const directories = new Set<string>()
-    yield* ripgrep
-      .find({
+    let scannedAt = 0
+    let scanning = false
+    const rescan = Effect.gen(function* () {
+      const files: string[] = []
+      const directories = new Set<string>()
+      yield* ripgrep.find({
         cwd: location.directory,
         pattern: "*",
         limit: location.vcs ? Number.MAX_SAFE_INTEGER : 100_000,
         onEntry: (entry) =>
           Effect.sync(() => {
-            state.files.push(entry.path)
+            files.push(entry.path)
             const parts = entry.path.split("/")
             parts.slice(0, -1).forEach((_, index) => directories.add(parts.slice(0, index + 1).join("/") + path.sep))
-            state.directories = Array.from(directories)
           }),
       })
-      .pipe(Effect.orDie, Effect.asVoid, Effect.forkIn(scope))
+      state.files = files
+      state.directories = Array.from(directories)
+    })
+    const rescanIfStale = Effect.suspend(() => {
+      if (scanning || Date.now() - scannedAt < RESCAN_INTERVAL_MS) return Effect.void
+      scanning = true
+      return rescan.pipe(
+        Effect.orDie,
+        // updated in ensuring so failed scans are also rate-limited
+        Effect.ensuring(
+          Effect.sync(() => {
+            scanning = false
+            scannedAt = Date.now()
+          }),
+        ),
+        Effect.forkIn(scope),
+        Effect.asVoid,
+      )
+    })
+    yield* rescanIfStale
     return Service.of({
       glob: (input) =>
         Effect.gen(function* () {
@@ -100,6 +125,7 @@ export const ripgrepLayer = Layer.effect(
         }),
       find: (input) =>
         Effect.gen(function* () {
+          yield* rescanIfStale
           const items =
             input.type === "file"
               ? state.files
