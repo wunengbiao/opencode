@@ -34,6 +34,7 @@ import { ConfigPaths } from "./paths"
 import { ConfigPlugin } from "./plugin"
 import { ConfigProxy } from "./proxy"
 import { ConfigVariable } from "./variable"
+import { ConfigV2Compat } from "./v2-compat"
 import { Npm } from "@opencode-ai/core/npm"
 import { withTransientReadRetry } from "@/util/effect-http-client"
 
@@ -185,6 +186,19 @@ const layer = Layer.effect(
 
     const readConfigFile = (filepath: string) => fs.readFileStringSafe(filepath).pipe(Effect.orDie)
 
+    const decodeConfig = Effect.fnUntraced(function* (input: unknown, source: string) {
+      const result = ConfigV2Compat.lower(normalizeLoadedConfig(input), source)
+      yield* Effect.forEach(result.diagnostics, (diagnostic) =>
+        Effect.logWarning("configuration compatibility diagnostic", {
+          source,
+          path: diagnostic.path,
+          kind: diagnostic.kind,
+          action: diagnostic.message,
+        }),
+      )
+      return ConfigParse.schema(ConfigV1.Info, result.value, source)
+    })
+
     const fetchRemoteJson = Effect.fnUntraced(function* <S extends Schema.Top>(
       url: string,
       headers: Record<string, string> | undefined,
@@ -225,7 +239,7 @@ const layer = Layer.effect(
         ),
       )
       const parsed = ConfigParse.jsonc(expanded, source)
-      const data = ConfigParse.schema(ConfigV1.Info, normalizeLoadedConfig(parsed), source)
+      const data = yield* decodeConfig(parsed, source)
       if (!("path" in options)) return data
 
       yield* Effect.promise(() => resolveLoadedPlugins(data, options.path))
@@ -633,7 +647,9 @@ const layer = Layer.effect(
       const dir = yield* InstanceState.directory
       const file = path.join(dir, "config.json")
       const existing = yield* loadFile(file)
-      const merged = mergeDeep(writable(existing), writable(config))
+      const text = yield* readConfigFile(file)
+      const original = text ? ConfigParse.jsonc(text, file) : writable(existing)
+      const merged = mergeDeep(isRecord(original) ? original : writable(existing), writable(config))
       yield* fs.writeFileString(file, JSON.stringify(merged, null, 2)).pipe(Effect.orDie)
       if (config.proxy !== undefined) yield* ConfigProxy.apply(merged.proxy)
     })
@@ -650,15 +666,16 @@ const layer = Layer.effect(
       let next: Info
       let changed: boolean
       if (!file.endsWith(".jsonc")) {
-        const existing = ConfigParse.schema(ConfigV1.Info, ConfigParse.jsonc(before, file), file)
-        const merged = mergeDeep(writable(existing), patch)
+        const existing = ConfigParse.jsonc(before, file)
+        ConfigParse.schema(ConfigV1.Info, ConfigV2Compat.lower(normalizeLoadedConfig(existing), file).value, file)
+        const merged = mergeDeep(isRecord(existing) ? existing : {}, patch)
         const serialized = JSON.stringify(merged, null, 2)
+        next = yield* decodeConfig(merged, file)
         changed = serialized !== before
         if (changed) yield* fs.writeFileString(file, serialized).pipe(Effect.orDie)
-        next = merged
       } else {
         const updated = patchJsonc(before, patch)
-        next = ConfigParse.schema(ConfigV1.Info, ConfigParse.jsonc(updated, file), file)
+        next = yield* decodeConfig(ConfigParse.jsonc(updated, file), file)
         changed = updated !== before
         if (changed) yield* fs.writeFileString(file, updated).pipe(Effect.orDie)
       }
