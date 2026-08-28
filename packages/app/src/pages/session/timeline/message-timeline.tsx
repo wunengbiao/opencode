@@ -76,6 +76,7 @@ import { scheduleConnectedMeasure } from "./measure"
 import { observeElementOffsetReconnectAware } from "./observe-element-offset"
 import { createTimelineProjection } from "./projection"
 import { MessageComment, SummaryDiff, TimelineRow, TimelineRowMap } from "./rows"
+import { railActiveMessageID, userMessagePreview, UserInputRail } from "./user-input-rail"
 import { filterVirtualIndexes } from "./virtual-items"
 
 const emptyMessages: MessageType[] = []
@@ -239,6 +240,7 @@ export function MessageTimeline(props: {
   actions?: UserActions
   scroll: { overflow: boolean; bottom: boolean; jump: boolean }
   onResumeScroll: () => void
+  onJumpToMessage?: (message: UserMessage) => void
   setScrollRef: (el: HTMLDivElement | undefined) => void
   onScheduleScrollState: (el: HTMLDivElement) => void
   onAutoScrollHandleScroll: () => void
@@ -497,6 +499,25 @@ export function MessageTimeline(props: {
     () => new Map(virtualizer.getVirtualItems().map((item) => [item.key, item] as const)),
   )
   const virtualRowKeys = createMemo(() => virtualizer.getVirtualItems().map((item) => item.key as string))
+  const railPreview = (messageID: string) => userMessagePreview(getMsgParts(messageID))
+  const [railFlash, setRailFlash] = createStore({ messageID: undefined as string | undefined })
+  let railFlashTimer: ReturnType<typeof setTimeout> | undefined
+  const triggerRailFlash = (message: UserMessage) => {
+    setRailFlash("messageID", message.id)
+    if (railFlashTimer !== undefined) clearTimeout(railFlashTimer)
+    railFlashTimer = setTimeout(() => setRailFlash("messageID", undefined), 1500)
+  }
+  onCleanup(() => {
+    if (railFlashTimer !== undefined) clearTimeout(railFlashTimer)
+  })
+  const railActiveID = createMemo(() =>
+    railActiveMessageID({
+      bottom: props.scroll.bottom,
+      startIndex: (virtualRowKeys(), virtualizer.range?.startIndex),
+      rows: timelineRows(),
+      userMessages: props.userMessages,
+    }),
+  )
   createEffect(() => {
     props.setRevealMessage?.((id) => {
       const index = messageRowIndex().get(id)
@@ -1048,18 +1069,30 @@ export function MessageTimeline(props: {
       const row = input.row()
       return row._tag === "AssistantPart" && row.previousAssistantPart
     }
+    const flashing = () => input.row()._tag === "UserMessage" && railFlash.messageID === input.row().userMessageID
 
     return (
       <div
         id={anchor() ? props.anchor(input.row().userMessageID) : undefined}
         data-message-id={input.row().userMessageID}
         data-timeline-row={input.row()._tag}
+        data-flash={flashing() ? "true" : undefined}
         classList={{
           "min-w-0 w-full max-w-full": true,
           "md:max-w-200 2xl:max-w-[1000px]": props.centered,
           "md:mx-auto": props.centered,
           "pt-3": previousAssistantPart(),
+          "session-message-flash": flashing(),
         }}
+        style={
+          flashing()
+            ? {
+                "--session-flash-color": settings.general.newLayoutDesigns()
+                  ? "var(--v2-icon-icon-accent)"
+                  : "var(--icon-base)",
+              }
+            : undefined
+        }
       >
         <div data-component="session-turn" class="min-w-0 w-full relative" style={{ height: "auto" }}>
           {input.children}
@@ -1840,6 +1873,17 @@ export function MessageTimeline(props: {
           </Show>
         </div>
       </ScrollView>
+      <UserInputRail
+        userMessages={props.userMessages}
+        activeMessageID={railActiveID}
+        flashMessageID={() => railFlash.messageID}
+        topOffset={showHeader() ? 48 : 0}
+        preview={railPreview}
+        onSelect={(message) => {
+          triggerRailFlash(message)
+          props.onJumpToMessage?.(message)
+        }}
+      />
     </div>
   )
 }

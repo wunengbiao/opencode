@@ -2087,6 +2087,10 @@ export default function Page() {
                   actions={actions}
                   scroll={ui.scroll}
                   onResumeScroll={resumeScroll}
+                  onJumpToMessage={(message) => {
+                    autoScroll.pause()
+                    scrollToMessage(message, "smooth")
+                  }}
                   setScrollRef={setScrollRef}
                   onScheduleScrollState={scheduleScrollState}
                   onAutoScrollHandleScroll={autoScroll.handleScroll}

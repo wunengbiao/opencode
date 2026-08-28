@@ -172,6 +172,27 @@
     }
   }
 
+  @keyframes session-message-flash {
+    0% {
+      background-color: color-mix(in srgb, var(--session-flash-color) 20%, transparent);
+    }
+
+    100% {
+      background-color: transparent;
+    }
+  }
+
+  [data-flash="true"].session-message-flash {
+    animation: session-message-flash 1.2s ease-out 250ms both;
+    border-radius: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .session-message-flash {
+      animation: none;
+    }
+  }
+
   @keyframes home-projects-fade-top {
     from {
       visibility: hidden;

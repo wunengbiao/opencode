@@ -928,6 +928,18 @@ describe("server session", () => {
     expect(store.data.part[message.id]).toBeUndefined()
   })
 
+  test("replaces an optimistic row when message.updated carries the same id but a different time", () => {
+    const optimistic = userMessage("message")
+    const store = setup({ child: session("child") }).store
+    store.optimistic.add({ sessionID: "child", message: optimistic, parts: [] })
+    expect(store.data.message.child).toEqual([optimistic])
+
+    const server = userMessage("message", { time: { created: 2 } })
+    store.apply({ type: "message.updated", properties: { sessionID: "child", info: server } })
+
+    expect(store.data.message.child).toEqual([server])
+  })
+
   test("does not remove parts confirmed by part events", () => {
     const message = userMessage("message")
     const part = textPart(message.id)
