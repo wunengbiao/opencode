@@ -77,6 +77,7 @@ import { observeElementOffsetReconnectAware } from "./observe-element-offset"
 import { createTimelineProjection } from "./projection"
 import { MessageComment, SummaryDiff, TimelineRow, TimelineRowMap } from "./rows"
 import { railActiveMessageID, userMessagePreview, UserInputRail } from "./user-input-rail"
+import { SessionSubagentRail } from "@/pages/session/composer/session-subagent-rail"
 import { filterVirtualIndexes } from "./virtual-items"
 
 const emptyMessages: MessageType[] = []
@@ -1884,6 +1885,7 @@ export function MessageTimeline(props: {
           props.onJumpToMessage?.(message)
         }}
       />
+      <SessionSubagentRail topOffset={showHeader() ? 48 : 0} />
     </div>
   )
 }
