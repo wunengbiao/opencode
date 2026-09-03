@@ -32,6 +32,7 @@ import { markdownBlockKey, type MarkdownToken } from "./markdown-worker-protocol
 import { shouldResetCodeTokens, type RenderedCodeState } from "./markdown-code-state"
 import { getCachedMarkdown, sanitizeMarkdown, touchCachedMarkdown, type MarkdownCacheEntry } from "./markdown-cache"
 import { inlineCodeKind } from "./markdown-inline-code-kind"
+import { disposeMermaid, updateMermaidBlock, upgradeMermaidPres, type MermaidLabels } from "./markdown-mermaid"
 
 type RenderedBlock =
   | (MarkdownCacheEntry & { key: string; mode: Exclude<Block["mode"], "code"> })
@@ -91,6 +92,8 @@ type CopyLabels = {
   copy: string
   copied: string
 }
+
+type BlockLabels = CopyLabels & MermaidLabels
 
 type CopyButtonState = {
   setLabels: Setter<CopyLabels>
@@ -275,9 +278,10 @@ function markInlineCode(root: HTMLDivElement) {
   }
 }
 
-function decorate(root: HTMLDivElement, labels: CopyLabels) {
+function decorate(root: HTMLDivElement, labels: BlockLabels) {
   const blocks = Array.from(root.querySelectorAll("pre"))
   for (const block of blocks) {
+    if (codeLanguage(block) === "mermaid") continue
     ensureCodeWrapper(block, labels)
   }
   if (!document.body.hasAttribute("data-new-layout")) return
@@ -436,6 +440,21 @@ export function Markdown(
           if (block.mode === "code") {
             const cached = completedCode.get(blockKey)
             if (block.complete && cached?.raw === block.raw) return cached
+            if (block.language === "mermaid") {
+              const rendered = {
+                key: blockKey,
+                mode: block.mode,
+                raw: block.raw,
+                hash: String(block.raw.length),
+                complete: !!block.complete,
+                language: block.language,
+                generation: 0,
+                stable: [] as MarkdownToken[],
+                unstable: [[block.src, ""] as MarkdownToken],
+              }
+              if (block.complete) completedCode.set(blockKey, rendered)
+              return rendered
+            }
             const result = await code(block.src, block.language, blockKey, block.complete)
             const rendered = {
               key: blockKey,
@@ -501,6 +520,7 @@ export function Markdown(
     if (isServer) return
     if (content.length === 0) {
       disposeCopyButtons(container)
+      disposeMermaid(container)
       container.innerHTML = ""
       return
     }
@@ -508,6 +528,8 @@ export function Markdown(
     const labels = {
       copy: i18n.t("ui.message.copy"),
       copied: i18n.t("ui.message.copied"),
+      generating: i18n.t("ui.message.mermaidGenerating"),
+      error: i18n.t("ui.message.mermaidError"),
     }
     const nextCodeKeys = new Set(content.filter((block) => block.mode === "code").map((block) => block.key))
     activeCodeKeys.forEach((key) => {
@@ -520,6 +542,7 @@ export function Markdown(
       const child = container.lastElementChild
       if (!child) break
       disposeCopyButtons(child)
+      disposeMermaid(child)
       child.remove()
     }
     container
@@ -586,9 +609,13 @@ function disposeCode(key: string) {
   disposeStreamingCode(key)
 }
 
-function updateBlock(container: HTMLDivElement, index: number, block: RenderedBlock, labels: CopyLabels) {
+function updateBlock(container: HTMLDivElement, index: number, block: RenderedBlock, labels: BlockLabels) {
   const current = container.children[index]
   if (block.mode === "code") {
+    if (block.language === "mermaid") {
+      updateMermaidBlock(container, current, block, labels)
+      return
+    }
     updateCodeBlock(container, current, block, labels)
     return
   }
@@ -609,6 +636,7 @@ function updateBlock(container: HTMLDivElement, index: number, block: RenderedBl
 
   if (!(current instanceof HTMLDivElement)) {
     container.appendChild(next)
+    upgradeMermaidPres(next, labels)
     return
   }
 
@@ -626,10 +654,14 @@ function updateBlock(container: HTMLDivElement, index: number, block: RenderedBl
       return true
     },
     onBeforeNodeDiscarded: (node) => {
-      if (node instanceof Element) disposeCopyButtons(node)
+      if (node instanceof Element) {
+        disposeCopyButtons(node)
+        disposeMermaid(node)
+      }
       return true
     },
   })
+  upgradeMermaidPres(current, labels)
 }
 
 function updateCodeBlock(
@@ -699,6 +731,7 @@ function updateCodeBlock(
   })
   if (current) {
     disposeCopyButtons(current)
+    disposeMermaid(current)
     current.replaceWith(next)
     return
   }

@@ -383,3 +383,34 @@ body:not([data-new-layout]) [data-component="markdown"] {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
+
+[data-component="markdown-mermaid"] {
+  margin-top: 12px;
+  margin-bottom: 24px;
+  padding: 12px;
+  border: 0.5px solid var(--v2-border-border-base);
+  border-radius: 6px;
+  background: var(--color-background-stronger);
+  overflow-x: auto;
+  direction: ltr;
+}
+
+[data-component="markdown-mermaid"] svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+[data-component="markdown-mermaid"] .markdown-mermaid-generating,
+[data-component="markdown-mermaid"] .markdown-mermaid-error {
+  font-size: 12px;
+  margin-bottom: 8px;
+  color: var(--text-base);
+  opacity: 0.8;
+}
+
+[data-component="markdown-mermaid"] .markdown-mermaid-error {
+  color: var(--color-v2-state-fg-danger);
+  opacity: 1;
+}
