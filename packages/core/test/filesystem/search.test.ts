@@ -98,4 +98,38 @@ describe("FileSystemSearch", () => {
       ),
     30_000,
   )
+
+  it.live(
+    "find includes symlinked files and directories",
+    () =>
+      withTmp((directory) =>
+        Effect.gen(function* () {
+          const search = yield* FileSystemSearch.Service
+          yield* Effect.promise(() => fs.mkdir(path.join(directory, "real")))
+          yield* Effect.promise(() => fs.writeFile(path.join(directory, "real", "linked-file.txt"), "x"))
+          yield* Effect.promise(() =>
+            fs.symlink(path.join(directory, "real", "linked-file.txt"), path.join(directory, "sym-file.txt")),
+          )
+          yield* Effect.promise(() => fs.symlink(path.join(directory, "real"), path.join(directory, "sym-dir")))
+          const files = yield* poll(search.find({ query: "sym-file", limit: 10, type: "file" }), (result) => result.length > 0)
+          expect(files.map((entry) => entry.path)).toContain(RelativePath.make("sym-file.txt"))
+          const directories = yield* poll(
+            search.find({ query: "sym-dir", limit: 10, type: "directory" }),
+            (result) => result.length > 0,
+          )
+          expect(directories.map((entry) => entry.path)).toContain(RelativePath.make("sym-dir/"))
+        }).pipe(
+          Effect.provide(
+            Layer.provideMerge(
+              FileSystemSearch.ripgrepLayer,
+              Layer.mergeAll(
+                LayerNode.compile(FSUtil.node),
+                Layer.succeed(Location.Service, Location.Service.of(location({ directory }))),
+              ),
+            ),
+          ),
+        ),
+      ),
+    30_000,
+  )
 })

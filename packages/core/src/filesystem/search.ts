@@ -43,6 +43,8 @@ export const ripgrepLayer = Layer.effect(
       yield* ripgrep.find({
         cwd: location.directory,
         pattern: "*",
+        // follow symlinks so linked files/directories are discoverable via @ search
+        follow: true,
         limit: location.vcs ? Number.MAX_SAFE_INTEGER : 100_000,
         onEntry: (entry) =>
           Effect.sync(() => {
