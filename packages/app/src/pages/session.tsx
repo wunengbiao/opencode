@@ -339,6 +339,7 @@ function SessionPanelFrame(props: ParentProps<{ newLayout: boolean; raised?: boo
     <div
       classList={{
         "flex-1 min-h-0 flex flex-col": true,
+        "relative": props.newLayout,
         "bg-v2-background-bg-base": props.newLayout,
         "bg-background-stronger": !props.newLayout,
         "rounded-[10px] overflow-hidden": props.newLayout,
@@ -446,6 +447,7 @@ export default function Page() {
   )
 
   const isDesktop = createMediaQuery("(min-width: 768px)")
+  const composerOverlay = createMemo(() => newSessionDesign() && isDesktop())
   const size = createSizing()
   const desktopReviewOpen = createMemo(() => isDesktop() && view().reviewPanel.opened())
   const desktopV2ReviewOpen = createMemo(() => newSessionDesign() && desktopReviewOpen() && !!params.id)
@@ -1568,10 +1570,18 @@ export default function Page() {
 
   let fill = () => {}
 
+  const applyComposerPadding = () => {
+    const height = composerOverlay() && promptDock ? Math.ceil(promptDock.getBoundingClientRect().height) : 0
+    if (panelRow) panelRow.style.setProperty("--session-composer-height", `${height}px`)
+    if (scroller) scroller.style.paddingBottom = height ? `${height}px` : ""
+  }
+  createEffect(applyComposerPadding)
+
   const setScrollRef = (el: HTMLDivElement | undefined) => {
     scroller = el
     autoScroll.scrollRef(el)
     if (!el) return
+    applyComposerPadding()
     scheduleScrollState(el)
     fill()
   }
@@ -1955,6 +1965,7 @@ export default function Page() {
         : false
 
       dockHeight = next
+      applyComposerPadding()
 
       if (stick) scrollToEnd()
 
@@ -2183,6 +2194,7 @@ export default function Page() {
           return (
             <SessionComposerRegion
               controller={controller}
+              overlay={composerOverlay()}
               promptInput={
                 <Show
                   when={newSessionDesign()}

@@ -91,8 +91,8 @@ export function UserInputRail(props: {
         ref={(el) => {
           wrapper = el
         }}
-        class="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{ top: `${props.topOffset}px` }}
+        class="absolute inset-x-0 pointer-events-none"
+        style={{ top: `calc(${props.topOffset}px + 24px)`, bottom: "calc(var(--session-composer-height, 0px) + 24px)" }}
       >
         <div
           ref={(el) => {

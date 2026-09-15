@@ -183,11 +183,8 @@ test.describe("smoke: session timeline", () => {
                 })
                 .map((element) => element.dataset.messageId!)
                 .filter((id) => ids.has(id))
-              const bottom = root
-                .querySelector<HTMLElement>('[data-timeline-row="bottom-spacer"]')
-                ?.getBoundingClientRect()
-              samples.push({ ids: visible, last: visible.includes(last), bottomError: bottom?.bottom - view.bottom })
-              if (!firstPaint && visible.includes(last) && Math.abs((bottom?.bottom ?? Infinity) - view.bottom) <= 1) {
+              samples.push({ ids: visible, last: visible.includes(last), bottomError: root.scrollHeight - root.scrollTop - root.clientHeight })
+              if (!firstPaint && visible.includes(last) && Math.abs(root.scrollHeight - root.scrollTop - root.clientHeight) <= 1) {
                 firstPaint = true
                 root.querySelectorAll<HTMLElement>("[data-timeline-key]").forEach((row) => {
                   const rect = row.getBoundingClientRect()
@@ -280,9 +277,6 @@ test.describe("smoke: session timeline", () => {
           )
           if (root) {
             const view = root.getBoundingClientRect()
-            const spacer = root
-              .querySelector<HTMLElement>('[data-timeline-row="bottom-spacer"]')
-              ?.getBoundingClientRect()
             const messages = [...root.querySelectorAll<HTMLElement>("[data-message-id]")].filter((element) => {
               const rect = element.getBoundingClientRect()
               return rect.bottom > view.top && rect.top < view.bottom
@@ -290,7 +284,7 @@ test.describe("smoke: session timeline", () => {
             samples.push({
               destination: messages.some((element) => ids.has(element.dataset.messageId!)),
               last: messages.some((element) => element.dataset.messageId === last),
-              bottomError: spacer ? spacer.bottom - view.bottom : undefined,
+              bottomError: root.scrollHeight - root.scrollTop - root.clientHeight,
             })
           }
           requestAnimationFrame(() => setTimeout(sample, 0))

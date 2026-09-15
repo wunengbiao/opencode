@@ -117,13 +117,12 @@ export async function installCachedRepaintProbe(
               return rect.bottom > view.top && rect.top < view.bottom
             })
             .map((element) => element.dataset.messageId!)
-          const spacer = root.querySelector<HTMLElement>('[data-timeline-row="bottom-spacer"]')?.getBoundingClientRect()
           state.samples.push({
             observedAtMs,
             root: id(root),
             scrollTop: root.scrollTop,
             scrollHeight: root.scrollHeight,
-            bottomErrorPx: spacer ? spacer.bottom - view.bottom : undefined,
+            bottomErrorPx: root.scrollHeight - root.scrollTop - root.clientHeight,
             last: messages.includes(last),
             rows,
             mounted: root.querySelectorAll("[data-timeline-key]").length,

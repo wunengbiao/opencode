@@ -11,6 +11,7 @@ import type { SessionComposerRegionController } from "./session-composer-region-
 export function SessionComposerRegion(props: {
   controller: SessionComposerRegionController
   promptInput: JSX.Element
+  overlay?: boolean
 }) {
   const language = useLanguage()
   const controller = props.controller
@@ -25,9 +26,11 @@ export function SessionComposerRegion(props: {
       ref={controller.setDockRef}
       data-component="session-prompt-dock"
       classList={{
-        "w-full shrink-0 flex flex-col justify-center items-center pb-3 pointer-events-none": true,
-        "bg-v2-background-bg-base": settings.general.newLayoutDesigns(),
-        "bg-background-stronger": !settings.general.newLayoutDesigns(),
+        "w-full flex flex-col justify-center items-center pb-3 pointer-events-none": true,
+        "shrink-0": !props.overlay,
+        "absolute inset-x-0 bottom-0 z-40": props.overlay,
+        "bg-v2-background-bg-base": !props.overlay && settings.general.newLayoutDesigns(),
+        "bg-background-stronger": !props.overlay && !settings.general.newLayoutDesigns(),
       }}
     >
       <div

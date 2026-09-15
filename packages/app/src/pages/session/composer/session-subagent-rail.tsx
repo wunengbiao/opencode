@@ -5,6 +5,7 @@ import { createResizeObserver } from "@solid-primitives/resize-observer"
 import type { ToolPart } from "@opencode-ai/sdk/v2"
 import { useLanguage } from "@/context/language"
 import { useSDK } from "@/context/sdk"
+import { useSettings } from "@/context/settings"
 import { useSync } from "@/context/sync"
 import { useSessionKey } from "@/pages/session/session-layout"
 import { legacySessionHref, requireServerKey, sessionHref } from "@/utils/session-route"
@@ -48,12 +49,14 @@ export function SessionSubagentRail(props: { topOffset: number }) {
   const sync = useSync()
   const sdk = useSDK()
   const language = useLanguage()
+  const settings = useSettings()
   const navigate = useNavigate()
   const { params } = useSessionKey()
   const tooltipID = createUniqueId()
 
   const [state, setState] = createStore({
     hoverIndex: undefined as number | undefined,
+    focusIndex: undefined as number | undefined,
     stripHeight: 0,
   })
   let barRefs: HTMLButtonElement[] = []
@@ -103,6 +106,42 @@ export function SessionSubagentRail(props: { topOffset: number }) {
     )
   }
 
+  const focusBar = (index: number) => {
+    setState("focusIndex", index)
+    barRefs[index]?.focus()
+  }
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    const count = subagents().length
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault()
+      const delta = event.key === "ArrowDown" ? 1 : -1
+      const start = state.focusIndex ?? (delta > 0 ? -1 : count)
+      focusBar(Math.min(count - 1, Math.max(0, start + delta)))
+      return
+    }
+    if (event.key === "Home") {
+      event.preventDefault()
+      focusBar(0)
+      return
+    }
+    if (event.key === "End") {
+      event.preventDefault()
+      focusBar(count - 1)
+      return
+    }
+    if (event.key !== "Enter" && event.key !== " ") return
+    if (event.target !== event.currentTarget) return
+    const index = state.focusIndex
+    if (index === undefined) return
+    const item = subagents()[index]
+    if (!item) return
+    event.preventDefault()
+    open(item)
+  }
+
+  const hovered = (index: number) => state.hoverIndex === index || state.focusIndex === index
+
   const ariaLabel = (item: SubagentItem) => {
     const status = language.t(statusKeys[item.status])
     if (!item.label) return status
@@ -110,7 +149,7 @@ export function SessionSubagentRail(props: { topOffset: number }) {
   }
 
   const tooltip = () => {
-    const index = state.hoverIndex
+    const index = state.hoverIndex ?? state.focusIndex
     if (index === undefined || index >= subagents().length) return undefined
     const bar = barRefs[index]
     if (!bar) return undefined
@@ -125,14 +164,23 @@ export function SessionSubagentRail(props: { topOffset: number }) {
   return (
     <Show when={subagents().length > 0}>
       <div
-        class="absolute inset-x-0 bottom-0 pointer-events-none"
-        style={{ top: `${props.topOffset}px` }}
+        class="absolute inset-x-0 pointer-events-none"
+        style={{ top: `calc(${props.topOffset}px + 24px)`, bottom: "calc(var(--session-composer-height, 0px) + 24px)" }}
         data-component="session-subagent-rail"
       >
         <div
           ref={strip}
+          role="toolbar"
+          aria-orientation="vertical"
+          tabindex={0}
           class="absolute inset-y-0 hidden md:flex flex-col justify-center pointer-events-auto outline-none"
           style={{ "inset-inline-end": "36px", gap: `${pillSize().gap}px` }}
+          onKeyDown={handleKeyDown}
+          onFocusOut={(event) => {
+            const next = event.relatedTarget
+            if (next instanceof Node && strip?.contains(next)) return
+            setState("focusIndex", undefined)
+          }}
         >
           <For each={subagents()}>
             {(item, index) => (
@@ -140,13 +188,21 @@ export function SessionSubagentRail(props: { topOffset: number }) {
                 type="button"
                 tabindex={-1}
                 aria-label={ariaLabel(item)}
-                aria-describedby={state.hoverIndex === index() ? tooltipID : undefined}
-                disabled={!item.childID}
+                aria-describedby={hovered(index()) ? tooltipID : undefined}
+                aria-disabled={!item.childID}
                 classList={{
-                  "rounded-full transition-transform duration-150": true,
-                  "bg-icon-success-base": item.status === "running" || item.status === "completed",
-                  "bg-icon-warning-base": item.status === "pending",
-                  "bg-icon-critical-base": item.status === "error",
+                  "rounded-full": true,
+                  "bg-icon-success-base":
+                    (item.status === "running" || item.status === "completed") && !settings.general.newLayoutDesigns(),
+                  "bg-icon-warning-base": item.status === "pending" && !settings.general.newLayoutDesigns(),
+                  "bg-icon-critical-base": item.status === "error" && !settings.general.newLayoutDesigns(),
+                  "bg-v2-state-fg-success":
+                    (item.status === "running" || item.status === "completed") && settings.general.newLayoutDesigns(),
+                  "bg-v2-state-fg-warning": item.status === "pending" && settings.general.newLayoutDesigns(),
+                  "bg-v2-state-fg-danger": item.status === "error" && settings.general.newLayoutDesigns(),
+                  "opacity-60": item.status === "completed",
+                  "animate-[var(--animate-pulse-scale)]": item.status === "running",
+                  "motion-reduce:animate-none": item.status === "running",
                   "cursor-pointer": !!item.childID,
                 }}
                 style={{ width: `${pillWidth}px`, height: `${pillSize().height}px` }}

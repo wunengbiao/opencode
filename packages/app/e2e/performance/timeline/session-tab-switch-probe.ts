@@ -80,7 +80,6 @@ async function installSessionSwitchProbe(
                 return rect.width > 0 && rect.height > 0 && rect.bottom > view.top && rect.top < view.bottom
               })
             : undefined
-          const spacer = root.querySelector<HTMLElement>('[data-timeline-row="bottom-spacer"]')?.getBoundingClientRect()
           samples.push({
             observedAtMs,
             destination: visible.filter((id) => destination.has(id)),
@@ -89,7 +88,7 @@ async function installSessionSwitchProbe(
             last: visible.includes(lastID),
             requiredPartVisible,
             bottomAnchorRequired: requireBottomAnchor !== false,
-            bottomErrorPx: spacer ? spacer.bottom - view.bottom : undefined,
+            bottomErrorPx: root.scrollHeight - root.scrollTop - root.clientHeight,
             review,
           })
         } else {
@@ -208,10 +207,7 @@ export async function waitForStableTimeline(page: Page, lastID: string) {
                       const rect = element.getBoundingClientRect()
                       return rect.bottom > view.top && rect.top < view.bottom
                     })
-                    const spacer = root
-                      .querySelector<HTMLElement>('[data-timeline-row="bottom-spacer"]')
-                      ?.getBoundingClientRect()
-                    resolve({ last, bottomErrorPx: spacer ? spacer.bottom - view.bottom : undefined })
+                    resolve({ last, bottomErrorPx: root.scrollHeight - root.scrollTop - root.clientHeight })
                   }, 0),
                 )
               }),

@@ -1334,9 +1334,12 @@ export function MessageTimeline(props: {
     <div class="relative w-full h-full min-w-0">
       <div
         class="absolute left-1/2 -translate-x-1/2 z-[60] pointer-events-none transition-all duration-200 ease-out"
+        style={{
+          bottom: settings.general.newLayoutDesigns()
+            ? "calc(var(--session-composer-height, 0px) + 2rem)"
+            : "1.5rem",
+        }}
         classList={{
-          "bottom-8": settings.general.newLayoutDesigns(),
-          "bottom-6": !settings.general.newLayoutDesigns(),
           "opacity-100 translate-y-0 scale-100": props.scroll.overflow && props.scroll.jump,
           "opacity-0 translate-y-2 pointer-events-none": !props.scroll.overflow || !props.scroll.jump,
           "scale-[0.8]": (!props.scroll.overflow || !props.scroll.jump) && settings.general.newLayoutDesigns(),
@@ -1406,6 +1409,7 @@ export function MessageTimeline(props: {
             data-session-title
             classList={{
               "sticky top-0 z-30": true,
+              "pointer-events-none": true,
               "bg-[linear-gradient(to_bottom,var(--v2-background-bg-base)_48px,transparent)]":
                 settings.general.newLayoutDesigns(),
               "bg-[linear-gradient(to_bottom,var(--background-stronger)_48px,transparent)]":
@@ -1418,7 +1422,7 @@ export function MessageTimeline(props: {
               "md:max-w-200 md:mx-auto 2xl:max-w-[1000px]": props.centered && !settings.general.newLayoutDesigns(),
             }}
           >
-            <div class="h-12 w-full flex items-center justify-between gap-2">
+            <div class="h-12 w-full flex items-center justify-between gap-2 pointer-events-auto">
               <div
                 classList={{
                   "flex items-center gap-1 min-w-0 flex-1": true,
