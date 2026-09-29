@@ -1081,7 +1081,7 @@ export function MessageTimeline(props: {
         data-flash={flashing() ? "true" : undefined}
         classList={{
           "min-w-0 w-full max-w-full": true,
-          "md:max-w-200 2xl:max-w-[1000px]": props.centered,
+          "md:max-w-[80%]": props.centered,
           "md:mx-auto": props.centered,
           "pt-3": previousAssistantPart(),
           "session-message-flash": flashing(),
@@ -1419,7 +1419,7 @@ export function MessageTimeline(props: {
               "pr-3": true,
               "pl-2.5": settings.general.newLayoutDesigns(),
               "pl-2 md:pl-4": !settings.general.newLayoutDesigns(),
-              "md:max-w-200 md:mx-auto 2xl:max-w-[1000px]": props.centered && !settings.general.newLayoutDesigns(),
+              "md:max-w-[80%] md:mx-auto": props.centered && !settings.general.newLayoutDesigns(),
             }}
           >
             <div class="h-12 w-full flex items-center justify-between gap-2 pointer-events-auto">
