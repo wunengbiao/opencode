@@ -34,3 +34,4 @@ logs/
 tsconfig.tsbuildinfo
 .codegraph
 bun.lock
+/artifacts/
