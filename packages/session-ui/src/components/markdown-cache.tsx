@@ -52,6 +52,22 @@ export function touchCachedMarkdown(key: string, value: MarkdownCacheEntry) {
   cache.delete(first)
 }
 
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+
+export async function fallbackMarkdown(text: string) {
+  try {
+    const { createMarkdownParser } = await import("@opencode-ai/ui/context/marked-parser")
+    const parser = createMarkdownParser(async (code, language) => {
+      const name = escapeHtml(language || "text")
+      return `<pre class="shiki OpenCode"><code class="language-${name}">${escapeHtml(code)}</code></pre>`
+    })
+    return sanitizeMarkdown(await parser.parse(text))
+  } catch {
+    return ""
+  }
+}
+
 export async function preloadMarkdown(text: string, cacheKey: string) {
   const key = `${cacheKey}:0:full`
   const cached = getCachedMarkdown(key)

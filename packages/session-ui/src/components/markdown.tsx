@@ -30,7 +30,13 @@ import {
 } from "./markdown-worker"
 import { markdownBlockKey, type MarkdownToken } from "./markdown-worker-protocol"
 import { shouldResetCodeTokens, type RenderedCodeState } from "./markdown-code-state"
-import { getCachedMarkdown, sanitizeMarkdown, touchCachedMarkdown, type MarkdownCacheEntry } from "./markdown-cache"
+import {
+  fallbackMarkdown,
+  getCachedMarkdown,
+  sanitizeMarkdown,
+  touchCachedMarkdown,
+  type MarkdownCacheEntry,
+} from "./markdown-cache"
 import { inlineCodeKind } from "./markdown-inline-code-kind"
 import { disposeMermaid, updateMermaidBlock, upgradeMermaidPres, type MermaidLabels } from "./markdown-mermaid"
 
@@ -381,6 +387,8 @@ export function Markdown(
   const activeCodeKeys = new Set<string>()
   const completedCode = new Map<string, Extract<RenderedBlock, { mode: "code" }>>()
   let streamed = false
+  const lifetime = new AbortController()
+  onCleanup(() => lifetime.abort())
   const [projection] = createResource(
     () => {
       if (isServer) return
@@ -393,6 +401,7 @@ export function Markdown(
     { initialValue: pendingProjection("") },
   )
   const currentProjection = () => {
+    if (projection.error) return completedProjection(local.text)
     if (!(local.streaming ?? false) && !streamed) return completedProjection(local.text)
     const value = projection.latest
     if (value?.text === local.text) return value
@@ -407,7 +416,11 @@ export function Markdown(
           key: local.cacheKey,
           projection: pendingProjection(local.text),
         }
-      const value = !(local.streaming ?? false) && !streamed ? completedProjection(local.text) : projection.latest
+      const value = projection.error
+        ? completedProjection(local.text)
+        : !(local.streaming ?? false) && !streamed
+          ? completedProjection(local.text)
+          : projection.latest
       if (!value || value.text !== local.text) return
       return {
         text: local.text,
@@ -477,27 +490,30 @@ export function Markdown(
           }
 
           const hash = checksum(block.raw)
-          const safe = sanitizeMarkdown(await parseMarkdown(block.src))
+          const safe = sanitizeMarkdown(await parseMarkdown(block.src, lifetime.signal))
           if (key && hash) touchCachedMarkdown(key, { raw: block.raw, hash, html: safe })
           return { key: blockKey, mode: block.mode, raw: block.raw, hash: hash ?? "", html: safe }
         }),
       )
         .then((blocks) => ({ text: src.text, blocks }) satisfies RenderResult)
-        .catch(
-          () =>
-            ({
-              text: src.text,
-              blocks: [
-                {
-                  key: base ?? "fallback",
-                  mode: "full" as const,
-                  raw: src.text,
-                  hash: checksum(src.text) ?? "",
-                  html: fallback(src.text),
-                },
-              ],
-            }) satisfies RenderResult,
-        )
+        .catch(async () => {
+          if (lifetime.signal.aborted) return { text: src.text, blocks: [] } satisfies RenderResult
+          const hash = checksum(src.text)
+          const parsed = (await fallbackMarkdown(src.text)) || fallback(src.text)
+          if (base && hash) touchCachedMarkdown(`${base}:0:full`, { raw: src.text, hash, html: parsed })
+          return {
+            text: src.text,
+            blocks: [
+              {
+                key: base ?? "fallback",
+                mode: "full" as const,
+                raw: src.text,
+                hash: hash ?? "",
+                html: parsed,
+              },
+            ],
+          } satisfies RenderResult
+        })
     },
     {
       initialValue: initialResult(

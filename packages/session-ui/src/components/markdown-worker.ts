@@ -1,4 +1,3 @@
-import MarkdownWorkerUrl from "./markdown.worker.ts?worker&url"
 import {
   applyMarkdownWorkerResponse,
   shouldReleaseMarkdownWorkerState,
@@ -55,22 +54,56 @@ const projectTransport = createWorkerTransport<Extract<MarkdownWorkerRequest, { 
   },
 })
 
-export function parseMarkdown(text: string) {
+const WORKER_TIMEOUT = 4000
+
+function killWorker(message: string) {
+  const error = new Error(message)
+  disabled = error
+  transport.reset()
+  projectTransport.reset()
+  pending.forEach((request) => request.reject(error))
+  projects.forEach((request) => request.reject(error))
+  parses.forEach((request) => request.reject(error))
+  pending.clear()
+  projects.clear()
+  parses.clear()
+  states.clear()
+  keys.clear()
+  latest.clear()
+  worker?.terminate()
+  worker = undefined
+}
+
+export function parseMarkdown(text: string, signal?: AbortSignal) {
+  if (signal?.aborted) return Promise.reject(new MarkdownWorkerDisposedError())
   const instance = getWorker()
   const id = ++nextID
+  const timer = setTimeout(() => killWorker("Markdown worker timed out"), WORKER_TIMEOUT)
+  const abort = () => {
+    const request = parses.get(id)
+    if (!request) return
+    parses.delete(id)
+    request.reject(new MarkdownWorkerDisposedError())
+  }
+  signal?.addEventListener("abort", abort, { once: true })
   return new Promise<string>((resolve, reject) => {
     parses.set(id, { resolve, reject })
     instance.postMessage({ type: "parse", id, text } satisfies MarkdownWorkerRequest)
+  }).finally(() => {
+    clearTimeout(timer)
+    signal?.removeEventListener("abort", abort)
+    parses.delete(id)
   })
 }
 
 export function projectMarkdown(key: string, text: string, live: boolean) {
   getWorker()
   const id = ++nextID
+  const timer = setTimeout(() => killWorker("Markdown worker timed out"), WORKER_TIMEOUT)
   return new Promise<Projection>((resolve, reject) => {
     projects.set(id, { key, resolve, reject })
     projectTransport.send({ type: "project", id, key, text, live })
-  })
+  }).finally(() => clearTimeout(timer))
 }
 
 export function disposeMarkdownProjection(key: string) {
@@ -117,7 +150,7 @@ function getWorker() {
   if (worker) return worker
   if (disabled) throw new MarkdownWorkerUnavailableError(disabled.message)
   try {
-    worker = new Worker(MarkdownWorkerUrl, { type: "module" })
+    worker = new Worker(new URL("./markdown.worker.ts", import.meta.url), { type: "module" })
   } catch (error) {
     disabled = error instanceof Error ? error : new Error(String(error))
     throw new MarkdownWorkerUnavailableError(disabled.message)
@@ -197,24 +230,7 @@ function getWorker() {
     result.resolve(state)
     transport.complete(key, event.data.id)
   }
-  const fail = (message: string) => {
-    const error = new Error(message)
-    disabled = error
-    transport.reset()
-    projectTransport.reset()
-    pending.forEach((request) => request.reject(error))
-    projects.forEach((request) => request.reject(error))
-    parses.forEach((request) => request.reject(error))
-    pending.clear()
-    projects.clear()
-    parses.clear()
-    states.clear()
-    keys.clear()
-    latest.clear()
-    worker?.terminate()
-    worker = undefined
-  }
-  worker.onerror = (event) => fail(event.message || "Markdown highlighting worker failed")
-  worker.onmessageerror = () => fail("Markdown worker response failed")
+  worker.onerror = (event) => killWorker(event.message || "Markdown highlighting worker failed")
+  worker.onmessageerror = () => killWorker("Markdown worker response failed")
   return worker
 }
