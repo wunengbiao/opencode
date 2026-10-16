@@ -274,28 +274,34 @@ function markCodeLinks(root: HTMLDivElement) {
   }
 }
 
-function markInlineCode(root: HTMLDivElement) {
+function markInlineCode(root: HTMLDivElement, openPaths: boolean) {
   const codeNodes = Array.from(root.querySelectorAll(":not(pre) > code"))
   for (const code of codeNodes) {
     if (!(code instanceof HTMLElement)) continue
     delete code.dataset.inlineCodeKind
     const kind = inlineCodeKind(code.textContent ?? "")
     if (kind) code.dataset.inlineCodeKind = kind
+    if (kind === "path" && openPaths) code.setAttribute("data-slot", "markdown-file-path")
+    else if (code.getAttribute("data-slot") === "markdown-file-path") code.removeAttribute("data-slot")
   }
 }
 
-function decorate(root: HTMLDivElement, labels: BlockLabels) {
+function decorate(root: HTMLDivElement, labels: BlockLabels, openPaths: boolean) {
   const blocks = Array.from(root.querySelectorAll("pre"))
   for (const block of blocks) {
     if (codeLanguage(block) === "mermaid") continue
     ensureCodeWrapper(block, labels)
   }
   if (!document.body.hasAttribute("data-new-layout")) return
-  markInlineCode(root)
+  markInlineCode(root, openPaths)
   markCodeLinks(root)
 }
 
-function setupCodeCopy(root: HTMLDivElement, getLabels: () => CopyLabels) {
+function setupCodeInteractions(
+  root: HTMLDivElement,
+  getLabels: () => CopyLabels,
+  getOpenFilePath: () => ((path: string) => void) | undefined,
+) {
   const timeouts = new Map<HTMLElement, ReturnType<typeof setTimeout>>()
 
   const updateLabel = (button: HTMLElement) => {
@@ -309,19 +315,31 @@ function setupCodeCopy(root: HTMLDivElement, getLabels: () => CopyLabels) {
     if (!(target instanceof Element)) return
 
     const button = target.closest('[data-slot="markdown-copy-button"]')
-    if (!(button instanceof HTMLElement)) return
-    const code = button.closest('[data-component="markdown-code"]')?.querySelector("code")
-    const content = code?.textContent ?? ""
-    if (!content) return
-    const clipboard = navigator?.clipboard
-    if (!clipboard) return
-    await clipboard.writeText(content)
-    const labels = getLabels()
-    setCopyState(button, labels, true)
-    const existing = timeouts.get(button)
-    if (existing) clearTimeout(existing)
-    const timeout = setTimeout(() => setCopyState(button, labels, false), 2000)
-    timeouts.set(button, timeout)
+    if (button instanceof HTMLElement) {
+      const code = button.closest('[data-component="markdown-code"]')?.querySelector("code")
+      const content = code?.textContent ?? ""
+      if (!content) return
+      const clipboard = navigator?.clipboard
+      if (!clipboard) return
+      await clipboard.writeText(content)
+      const labels = getLabels()
+      setCopyState(button, labels, true)
+      const existing = timeouts.get(button)
+      if (existing) clearTimeout(existing)
+      const timeout = setTimeout(() => setCopyState(button, labels, false), 2000)
+      timeouts.set(button, timeout)
+      return
+    }
+
+    const open = getOpenFilePath()
+    if (!open) return
+    const path = target.closest('code[data-slot="markdown-file-path"]')
+    if (!(path instanceof HTMLElement)) return
+    const selection = window.getSelection()
+    if (selection && !selection.isCollapsed) return
+    const value = (path.textContent ?? "").trim()
+    if (!value) return
+    open(value)
   }
 
   const buttons = Array.from(root.querySelectorAll('[data-slot="markdown-copy-button"]'))
@@ -378,9 +396,17 @@ export function Markdown(
     streaming?: boolean
     class?: string
     classList?: Record<string, boolean>
+    onOpenFilePath?: (path: string) => void
   },
 ) {
-  const [local, others] = splitProps(props, ["text", "cacheKey", "streaming", "class", "classList"])
+  const [local, others] = splitProps(props, [
+    "text",
+    "cacheKey",
+    "streaming",
+    "class",
+    "classList",
+    "onOpenFilePath",
+  ])
   const i18n = useI18n()
   const [root, setRoot] = createSignal<HTMLDivElement>()
   const owner = createUniqueId()
@@ -525,7 +551,7 @@ export function Markdown(
     },
   )
 
-  let copyCleanup: (() => void) | undefined
+  let codeInteractionsCleanup: (() => void) | undefined
 
   createEffect(() => {
     const container = root()
@@ -553,7 +579,8 @@ export function Markdown(
     })
     activeCodeKeys.clear()
     nextCodeKeys.forEach((key) => activeCodeKeys.add(key))
-    content.forEach((block, index) => updateBlock(container, index, block, labels))
+    const openPaths = !!local.onOpenFilePath
+    content.forEach((block, index) => updateBlock(container, index, block, labels, openPaths))
     while (container.children.length > content.length) {
       const child = container.lastElementChild
       if (!child) break
@@ -564,15 +591,19 @@ export function Markdown(
     container
       .querySelectorAll<HTMLElement>('[data-slot="markdown-copy-button"]')
       .forEach((button) => setCopyState(button, labels, button.dataset.copied === "true"))
-    if (!copyCleanup)
-      copyCleanup = setupCodeCopy(container, () => ({
-        copy: i18n.t("ui.message.copy"),
-        copied: i18n.t("ui.message.copied"),
-      }))
+    if (!codeInteractionsCleanup)
+      codeInteractionsCleanup = setupCodeInteractions(
+        container,
+        () => ({
+          copy: i18n.t("ui.message.copy"),
+          copied: i18n.t("ui.message.copied"),
+        }),
+        () => local.onOpenFilePath,
+      )
   })
 
   onCleanup(() => {
-    if (copyCleanup) copyCleanup()
+    if (codeInteractionsCleanup) codeInteractionsCleanup()
     disposeMarkdownProjection(owner)
     activeCodeKeys.forEach(disposeCode)
     completedCode.clear()
@@ -625,7 +656,13 @@ function disposeCode(key: string) {
   disposeStreamingCode(key)
 }
 
-function updateBlock(container: HTMLDivElement, index: number, block: RenderedBlock, labels: BlockLabels) {
+function updateBlock(
+  container: HTMLDivElement,
+  index: number,
+  block: RenderedBlock,
+  labels: BlockLabels,
+  openPaths: boolean,
+) {
   const current = container.children[index]
   if (block.mode === "code") {
     if (block.language === "mermaid") {
@@ -648,7 +685,7 @@ function updateBlock(container: HTMLDivElement, index: number, block: RenderedBl
   next.dataset.markdownHash = block.hash
   next.style.display = "contents"
   next.innerHTML = block.html
-  decorate(next, labels)
+  decorate(next, labels, openPaths)
 
   if (!(current instanceof HTMLDivElement)) {
     container.appendChild(next)

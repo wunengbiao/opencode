@@ -1163,6 +1163,13 @@ export default function Page() {
     loadFile: file.load,
   })
 
+  const openMessageFilePath = (value: string) => {
+    const path = value.replace(/#L\d+(?:-L\d+)?$/, "").replace(/:\d+(?::\d+)?$/, "")
+    if (!path) return
+    openReviewPanel()
+    openReviewFile(path)
+  }
+
   const changesLabel = (option: ChangeMode) => {
     if (option === "git") return language.t("ui.sessionReview.title.git")
     if (option === "branch") return language.t("ui.sessionReview.title.branch")
@@ -2133,6 +2140,7 @@ export default function Page() {
                   setScrollToEnd={(fn) => {
                     scrollToEnd = fn
                   }}
+                  onOpenFilePath={openMessageFilePath}
                 />
               )}
             </Show>

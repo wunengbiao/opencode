@@ -259,6 +259,16 @@
     );
   }
 
+  :not(pre) > code[data-slot="markdown-file-path"] {
+    cursor: pointer;
+  }
+
+  :not(pre) > code[data-slot="markdown-file-path"]:hover {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklch, var(--markdown-inline-code-path-color) 25%, transparent);
+    text-underline-offset: 2px;
+  }
+
   a.external-link > code[data-inline-code-kind="url"] {
     color: var(--markdown-inline-code-color);
     background: none;
