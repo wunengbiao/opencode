@@ -83,6 +83,31 @@ describe("Composer store", () => {
     ])
   })
 
+  test("completes an abutting directory mention without a trailing space", () => {
+    const prompt = createPromptStore()
+    prompt.setPrompt(
+      [
+        { type: "file", path: "src/", content: "@src/", start: 0, end: 5, mime: "application/x-directory" },
+        { type: "text", content: "lib", start: 5, end: 8 },
+      ],
+      8,
+    )
+
+    prompt.addMention({
+      type: "file",
+      path: "src/lib/",
+      content: "@src/lib/",
+      start: 0,
+      end: 0,
+      mime: "application/x-directory",
+    })
+
+    expect(prompt.state.prompt).toEqual([
+      { type: "file", path: "src/lib/", content: "@src/lib/", start: 0, end: 9, mime: "application/x-directory" },
+    ])
+    expect(prompt.state.cursor).toBe(9)
+  })
+
   test("prepends a skill mention to an attachment-only draft without flattening it", () => {
     const prompt = createPromptStore()
     prompt.setPrompt([{ type: "file", path: "one", content: "@one", start: 0, end: 4 }], 4)

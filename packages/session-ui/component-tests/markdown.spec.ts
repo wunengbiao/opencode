@@ -292,6 +292,50 @@ story("keeps inline code backgrounds 18px tall", async ({ page }) => {
   ).toEqual([18, 18])
 })
 
+story("parses Markdown on the main thread when the worker is unavailable", async ({ page }) => {
+  const html = await page.evaluate(async (fixture) => {
+    const { fallbackMarkdown } = await import(fixture)
+
+    return fallbackMarkdown("**Now bold**\n\n`src/file.ts`\n\n```ts\nconst value = 1 < 2\n```")
+  }, fixture)
+
+  expect(html).toContain("<strong>Now bold</strong>")
+  expect(html).toContain('class="language-ts"')
+  expect(html).toContain("const value = 1 &lt; 2")
+})
+
+story("opens an inline file path without its line suffix and ignores selected text", async ({ page }) => {
+  await page.evaluate(async (fixture) => {
+    const { mountMarkdown } = await import(fixture)
+    await mountMarkdown({ text: "`src/file.ts#L12-L34`" })
+  }, fixture)
+
+  const harness = page.getByTestId("markdown-fixture")
+  const path = harness.locator('code[data-slot="markdown-file-path"]')
+  await expect(path).toHaveText("src/file.ts#L12-L34")
+  await expect(path).toHaveAttribute("data-inline-code-kind", "path")
+
+  expect(
+    await page.evaluate(() => {
+      const code = document.querySelector('[data-testid="markdown-fixture"] code[data-slot="markdown-file-path"]')
+
+      if (!code) return "missing"
+      const range = document.createRange()
+      range.selectNodeContents(code)
+      const selection = window.getSelection()
+      selection?.removeAllRanges()
+      selection?.addRange(range)
+      code.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }))
+
+      return document.querySelector('[data-testid="opened-local-file"]')?.textContent
+    }),
+  ).toBe("")
+
+  await page.evaluate(() => getSelection()?.removeAllRanges())
+  await path.click()
+  await expect(harness.getByTestId("opened-local-file")).toHaveText("src/file.ts")
+})
+
 story("shares in-flight Markdown rendering without overwriting a reclaimed cache entry", async ({ page }) => {
   const result = await page.evaluate(async (fixture) => {
     const { getCachedMarkdown, renderCachedMarkdown } = await import(fixture)

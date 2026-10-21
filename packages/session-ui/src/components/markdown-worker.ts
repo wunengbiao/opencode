@@ -66,10 +66,13 @@ const projectTransport = createWorkerTransport<Extract<MarkdownWorkerRequest, { 
   },
 })
 
+const WORKER_TIMEOUT = 4000
+
 export function parseMarkdown(text: string, signal: AbortSignal) {
   if (signal.aborted) return Promise.reject(new MarkdownWorkerDisposedError())
   const instance = getWorker()
   const id = ++nextID
+  const timer = setTimeout(() => killWorker("Markdown worker timed out"), WORKER_TIMEOUT)
 
   const abort = () => {
     parses.get(id)?.reject(new MarkdownWorkerDisposedError())
@@ -81,6 +84,7 @@ export function parseMarkdown(text: string, signal: AbortSignal) {
     signal.addEventListener("abort", abort, { once: true })
     instance.postMessage({ type: "parse", id, text } satisfies MarkdownWorkerRequest)
   }).finally(() => {
+    clearTimeout(timer)
     signal.removeEventListener("abort", abort)
     parses.delete(id)
   })
@@ -89,11 +93,12 @@ export function parseMarkdown(text: string, signal: AbortSignal) {
 export function projectMarkdown(key: string, text: string, live: boolean) {
   getWorker()
   const id = ++nextID
+  const timer = setTimeout(() => killWorker("Markdown worker timed out"), WORKER_TIMEOUT)
 
   return new Promise<Projection>((resolve, reject) => {
     projects.set(id, { key, resolve, reject })
     projectTransport.send({ type: "project", id, key, text, live })
-  })
+  }).finally(() => clearTimeout(timer))
 }
 
 export function disposeMarkdownProjection(key: string) {
@@ -257,26 +262,28 @@ function getWorker() {
     transport.complete(key, event.data.id)
   }
 
-  const fail = (message: string) => {
-    const error = new Error(message)
-    disabled = error
-    transport.reset()
-    projectTransport.reset()
-    pending.forEach((request) => request.reject(error))
-    projects.forEach((request) => request.reject(error))
-    parses.forEach((request) => request.reject(error))
-    pending.clear()
-    projects.clear()
-    parses.clear()
-    states.clear()
-    keys.clear()
-    latest.clear()
-    worker?.terminate()
-    worker = undefined
-  }
-
-  worker.onerror = (event) => fail(event.message || "Markdown highlighting worker failed")
-  worker.onmessageerror = () => fail("Markdown worker response failed")
+  worker.onerror = (event) => killWorker(event.message || "Markdown highlighting worker failed")
+  worker.onmessageerror = () => killWorker("Markdown worker response failed")
 
   return worker
+}
+
+// One failed or timed-out request makes every pending request reject and disables the worker: a fresh worker would
+// repeat the same failure, and callers fall back to the main thread.
+function killWorker(message: string) {
+  const error = new Error(message)
+  disabled = error
+  transport.reset()
+  projectTransport.reset()
+  pending.forEach((request) => request.reject(error))
+  projects.forEach((request) => request.reject(error))
+  parses.forEach((request) => request.reject(error))
+  pending.clear()
+  projects.clear()
+  parses.clear()
+  states.clear()
+  keys.clear()
+  latest.clear()
+  worker?.terminate()
+  worker = undefined
 }

@@ -22,6 +22,7 @@ import {
 } from "../suggestions/machine"
 import { clonePrompt, isAttachment, promptLength } from "../prompt-parts"
 import type { ComposerQueue } from "../adapter"
+import { getCursorPosition, setCursorPosition } from "./dom"
 
 export type ComposerSelectControl = {
   options: Accessor<ComposerOption[]>
@@ -195,7 +196,7 @@ export function createComposerEditor(input: {
       return
     }
 
-    if (command.type === "focus.editor") requestAnimationFrame(() => editor?.focus())
+    if (command.type === "focus.editor") requestAnimationFrame(() => restoreFocus())
   }
 
   function dispatch(event: ComposerInteractionEvent) {
@@ -309,9 +310,27 @@ export function createComposerEditor(input: {
 
   const restoreFocus = (cursor = draft.state.cursor ?? promptLength(draft.state.prompt)) => {
     requestAnimationFrame(() => {
-      editor?.focus()
-      setEditorCursor(editor, cursor)
+      if (!editor) return
+      const selection = window.getSelection()
+
+      const placed =
+        document.activeElement === editor &&
+        !!selection?.isCollapsed &&
+        !!selection.anchorNode &&
+        editor.contains(selection.anchorNode)
+
+      if (document.activeElement !== editor) editor.focus()
+
+      if (placed) return
+      setCursorPosition(editor, cursor)
     })
+  }
+
+  const restoreCaret = (cursor = draft.state.cursor ?? promptLength(draft.state.prompt)) => {
+    if (!editor) return
+
+    if (document.activeElement !== editor) editor.focus()
+    setCursorPosition(editor, cursor)
   }
 
   const applyHistory = (entry: ComposerHistoryEntry, position: "start" | "end") => {
@@ -328,7 +347,7 @@ export function createComposerEditor(input: {
     if (!selection?.isCollapsed || !editor.contains(selection.anchorNode)) return false
     const text = draft.state.prompt.map((part) => ("content" in part ? part.content : "")).join("")
 
-    if (!canNavigateHistory(direction, text, editorCursor(editor), state.historyIndex >= 0)) return false
+    if (!canNavigateHistory(direction, text, getCursorPosition(editor), state.historyIndex >= 0)) return false
     const entries = input.history.entries(state.mode)
 
     if (direction === "up") {
@@ -436,6 +455,7 @@ export function createComposerEditor(input: {
       input.onEditor?.(element)
     },
     restoreFocus,
+    restoreCaret,
     onInput(value: string, prompt?: ComposerPersistedState["prompt"], cursor?: number) {
       if (prompt) draft.setPrompt(prompt, cursor)
 
@@ -567,40 +587,4 @@ function canNavigateHistory(direction: "up" | "down", text: string, cursor: numb
   if (direction === "up") return position === 0 && text.length === 0
 
   return position === text.length
-}
-
-function editorCursor(editor: HTMLElement) {
-  const selection = window.getSelection()
-
-  if (!selection?.rangeCount || !editor.contains(selection.anchorNode)) return editor.textContent?.length ?? 0
-  const range = selection.getRangeAt(0).cloneRange()
-  range.selectNodeContents(editor)
-  range.setEnd(selection.anchorNode!, selection.anchorOffset)
-
-  return range.toString().length
-}
-
-function setEditorCursor(editor: HTMLElement | undefined, cursor: number) {
-  if (!editor) return
-  const walker = document.createTreeWalker(editor, NodeFilter.SHOW_TEXT)
-  let remaining = cursor
-  let node = walker.nextNode()
-
-  while (node) {
-    const length = node.textContent?.length ?? 0
-
-    if (remaining <= length) {
-      const range = document.createRange()
-      range.setStart(node, remaining)
-      range.collapse(true)
-      const selection = window.getSelection()
-      selection?.removeAllRanges()
-      selection?.addRange(range)
-
-      return
-    }
-
-    remaining -= length
-    node = walker.nextNode()
-  }
 }

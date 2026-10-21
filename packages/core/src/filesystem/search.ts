@@ -71,6 +71,7 @@ export const ripgrepLayer = Layer.effect(
         pattern: "*",
         limit: location.vcs && !home ? Number.MAX_SAFE_INTEGER : 100_000,
         exclude: home ? [...Protected.names()].map((name) => `${name}/**`) : undefined,
+        follow: true,
         onEntry: (entry) =>
           Effect.sync(() => {
             next.files.set(entry.path, previous.files.get(entry.path) ?? fuzzysort.prepare(entry.path))

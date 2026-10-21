@@ -7,7 +7,7 @@ import type {
   ComposerPersistedState,
   ComposerPrompt,
 } from "../types"
-import { isAttachment, promptLength } from "../prompt-parts"
+import { isAttachment, mentionQuery, promptLength } from "../prompt-parts"
 
 export type ComposerStateStore = [
   Store<ComposerPersistedState> | Accessor<Store<ComposerPersistedState>>,
@@ -82,9 +82,10 @@ export function createComposerEditorActions(input: ComposerStateStoreInput) {
         .join("")
 
       const end = range?.end ?? store().cursor ?? text.length
-      const start = range?.start ?? text.slice(0, end).lastIndexOf("@")
-      setStore()("prompt", insertMention(store().prompt, start < 0 ? end : start, end, mention))
-      setStore()("cursor", (start < 0 ? end : start) + mention.content.length + 1)
+      const start = range?.start ?? mentionQuery(store().prompt, end)?.start ?? text.slice(0, end).lastIndexOf("@")
+      const inserted = insertMention(store().prompt, start < 0 ? end : start, end, mention)
+      setStore()("prompt", inserted.prompt)
+      setStore()("cursor", inserted.cursor)
       clearRetry()
     },
     removeAttachment(id: string) {
@@ -128,30 +129,100 @@ function insertMention(
   start: number,
   end: number,
   mention: ComposerFilePart | ComposerAgentPart | ComposerSkillPart,
-): ComposerPrompt {
-  if (start === 0 && end === 0) {
-    return withOffsets([mention, { type: "text", content: " ", start: 0, end: 0 }, ...prompt])
-  }
+) {
+  if (start === end) return insertMentionAt(prompt, start, mention)
 
   let position = 0
+  let inserted = false
+  let cursor = start + mention.content.length
 
   const parts = prompt.flatMap<ComposerPrompt[number]>((part) => {
     if (isAttachment(part)) return [part]
     const partStart = position
     position += part.content.length
 
-    if (part.type !== "text" || start < partStart || end > position) return [part]
-    const before = part.content.slice(0, start - partStart)
-    const after = part.content.slice(end - partStart)
+    if (position <= start || partStart >= end) return [part]
+
+    if (inserted) {
+      if (part.type !== "text") return []
+      const after = part.content.slice(end - partStart)
+
+      return after ? [{ type: "text" as const, content: after, start: 0, end: 0 }] : []
+    }
+
+    inserted = true
+    const before = part.type === "text" ? part.content.slice(0, start - partStart) : ""
+    const after = part.type === "text" ? part.content.slice(Math.max(0, end - partStart)) : ""
+    const tail = after ? ` ${after}` : mentionSeparator(mention)
+
+    if (tail) cursor++
 
     return [
       ...(before ? [{ type: "text" as const, content: before, start: 0, end: 0 }] : []),
       mention,
-      { type: "text" as const, content: ` ${after}`, start: 0, end: 0 },
+      ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : []),
     ]
   })
 
-  return withOffsets(parts)
+  if (!inserted) return insertMentionAt(prompt, end, mention)
+
+  return { prompt: withOffsets(parts), cursor }
+}
+
+function insertMentionAt(
+  prompt: ComposerPrompt,
+  cursor: number,
+  mention: ComposerFilePart | ComposerAgentPart | ComposerSkillPart,
+) {
+  let position = 0
+  let inserted = false
+  let next = 0
+
+  const parts = prompt.flatMap<ComposerPrompt[number]>((part) => {
+    if (isAttachment(part)) return [part]
+    const partStart = position
+    position += part.content.length
+
+    if (inserted) return [part]
+
+    if (part.type !== "text") {
+      if (cursor > partStart) return [part]
+      const tail = mentionSeparator(mention)
+      inserted = true
+      next = partStart + mention.content.length + (tail ? 1 : 0)
+
+      return [mention, ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : []), part]
+    }
+
+    if (cursor < partStart || cursor > position) return [part]
+
+    inserted = true
+    const before = part.content.slice(0, cursor - partStart)
+    const after = part.content.slice(cursor - partStart)
+    const tail = after ? ` ${after}` : mentionSeparator(mention)
+    next = cursor + mention.content.length + (tail ? 1 : 0)
+
+    return [
+      ...(before ? [{ type: "text" as const, content: before, start: 0, end: 0 }] : []),
+      mention,
+      ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : []),
+    ]
+  })
+
+  if (inserted) return { prompt: withOffsets(parts), cursor: next }
+
+  const tail = mentionSeparator(mention)
+
+  return {
+    prompt: withOffsets([...parts, mention, ...(tail ? [{ type: "text" as const, content: tail, start: 0, end: 0 }] : [])]),
+    cursor: promptLength(parts) + mention.content.length + tail.length,
+  }
+}
+
+function mentionSeparator(mention: ComposerFilePart | ComposerAgentPart | ComposerSkillPart) {
+  if (mention.type === "file" && mention.mime === "application/x-directory") return ""
+
+  return " "
 }
 
 function withOffsets(prompt: ComposerPrompt): ComposerPrompt {

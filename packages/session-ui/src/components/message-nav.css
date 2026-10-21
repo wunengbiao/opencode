@@ -14,6 +14,20 @@
   &[data-size="compact"] {
     width: 24px;
   }
+
+  &[data-size="rail"] {
+    width: 32px;
+    height: 100%;
+    align-items: flex-start;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
 
 [data-slot="message-nav-item"] {
@@ -25,6 +39,91 @@
   [data-component="message-nav"][data-size="normal"] & {
     justify-content: flex-start;
   }
+
+  [data-component="message-nav"][data-size="rail"] & {
+    justify-content: flex-start;
+    height: auto;
+  }
+}
+
+[data-slot="message-nav-rail-pill"] {
+  display: block;
+  width: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background-color: var(--v2-icon-icon-muted);
+  cursor: pointer;
+  transition:
+    width 150ms,
+    background-color 150ms;
+
+  &:hover,
+  &:focus-visible {
+    width: 32px;
+    background-color: var(--v2-icon-icon-base);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--v2-border-border-focus);
+    outline-offset: -2px;
+  }
+
+  &[data-active] {
+    width: 28px;
+    background-color: var(--v2-icon-icon-accent);
+  }
+
+  &[data-active]:hover,
+  &[data-active]:focus-visible {
+    width: 32px;
+    background-color: var(--v2-icon-icon-accent-hover);
+  }
+}
+
+[data-popper-positioner]:has([data-slot="message-nav-rail-tooltip"]) {
+  z-index: 1000;
+}
+
+[data-slot="message-nav-rail-tooltip"] {
+  z-index: 1000;
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--v2-background-bg-layer-01);
+  box-shadow: var(--v2-elevation-floating);
+  color: var(--v2-text-text-base);
+  font-size: 13px;
+  line-height: var(--line-height-compact);
+  letter-spacing: -0.04px;
+  pointer-events: none;
+}
+
+[data-slot="message-nav-rail-tooltip-content"] {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+[data-slot="message-nav-rail-tooltip-title"] {
+  margin: 0;
+  overflow: hidden;
+  font-weight: 530;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-slot="message-nav-rail-tooltip-body"] {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: var(--v2-text-text-muted);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: pre-line;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 [data-slot="message-nav-tick-button"] {

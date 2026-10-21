@@ -4,6 +4,8 @@ import { SessionMessage } from "@opencode/schema/session-message"
 import { ServerScope } from "@/runtime/server/scope"
 import { createComposerState, type ComposerStore } from "@/composer/state"
 import { createComposerEditorActions } from "@/composer/editor/actions"
+import type { Platform } from "@/runtime/platform/platform"
+import type { DraftStore } from "@/runtime/persistence/drafts"
 import { flushPersisted } from "@/runtime/persistence/persist"
 
 function setup(read: () => string | null | Promise<string | null> = () => null) {
@@ -157,6 +159,57 @@ test("composer-write-batch: an edit still wins over a pending persisted read", a
     flushPersisted()
     expect(value.writes).toHaveLength(1)
     expect(value.writes[0].prompt).toEqual([{ type: "text", content: "new", start: 0, end: 3 }])
+  } finally {
+    value.dispose()
+  }
+})
+
+test("composer-write-batch: a slow draft load cannot clobber a save made while it loaded", async () => {
+  const loading = Promise.withResolvers<string | null>()
+  let stored: string | null = null
+
+  const draftStore: DraftStore = {
+    getItem: () => loading.promise,
+    setItem: async (_key, value) => {
+      stored = value
+    },
+    removeItem: async () => {
+      stored = null
+    },
+    putBlob: async () => ({ id: "blob", url: "" }),
+    setDocument: async (_key, document) => {
+      stored = JSON.stringify(document)
+    },
+  }
+
+  const platform: Platform = {
+    platform: "web",
+    openExternal() {},
+    restart: async () => {},
+    notify: async () => {},
+    draftStore,
+  }
+
+  const value = createRoot((dispose) => ({
+    state: createComposerState(ServerScope.local, { draftID: "composer-slow-draft-load" }, undefined, platform),
+    dispose,
+  }))
+
+  try {
+    value.state.set([{ type: "text", content: "new", start: 0, end: 3 }], 3)
+    flushPersisted()
+    // The stored cursor normalizes from -1 to 0, so the stale read writes its snapshot back.
+    loading.resolve(
+      JSON.stringify({
+        prompt: [{ type: "text", content: "old", start: 0, end: 3 }],
+        cursor: -1,
+        context: { items: [] },
+      }),
+    )
+    await value.state.ready.promise
+    expect(value.state.current()).toEqual([{ type: "text", content: "new", start: 0, end: 3 }])
+    expect(value.state.cursor()).toBe(3)
+    expect(JSON.parse(stored ?? "null")).toMatchObject({ prompt: [{ content: "new" }], cursor: 3 })
   } finally {
     value.dispose()
   }

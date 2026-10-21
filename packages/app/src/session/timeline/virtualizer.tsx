@@ -433,6 +433,24 @@ export function createTimelineVirtualizer(input: Input) {
     return true
   }
 
+  // Scrolls a message row to the middle of the viewport, opening nothing.
+  function revealMessage(id: string, partID?: string) {
+    if (!active()) return
+
+    const partIndex = partID
+      ? rows().findIndex(
+          (row) =>
+            Predicate.isTagged(row, "AssistantPart") && row.group.type === "part" && row.group.ref.partID === partID,
+        )
+      : -1
+
+    const index = partIndex >= 0 ? partIndex : input.projection.messageRowIndex().get(id)
+
+    if (index === undefined) return
+    prepareNavigation()
+    virtualizer.scrollToIndex(index, { align: "center" })
+  }
+
   // Puts the anchored tool's top edge at its scroll margin, just below the headers that stick above it. Its own
   // growth extends downward, so only size changes at or above its row can move it; each of those calls this again.
   function pinAnchor() {
@@ -512,22 +530,7 @@ export function createTimelineVirtualizer(input: Input) {
       reportOffset?.(root.scrollTop, false)
       settleColdBottom()
     })
-    input.setRevealMessage?.((id, partID) => {
-      if (!active()) return
-
-      const partIndex = partID
-        ? rows().findIndex(
-            (row) =>
-              Predicate.isTagged(row, "AssistantPart") && row.group.type === "part" && row.group.ref.partID === partID,
-          )
-        : -1
-
-      const index = partIndex >= 0 ? partIndex : input.projection.messageRowIndex().get(id)
-
-      if (index === undefined) return
-      prepareNavigation()
-      virtualizer.scrollToIndex(index, { align: "center" })
-    })
+    input.setRevealMessage?.((id, partID) => revealMessage(id, partID))
     input.setScrollToEnd?.(() => {
       if (!active() || !listRoot()?.isConnected) return
       prepareNavigation()
@@ -947,6 +950,7 @@ export function createTimelineVirtualizer(input: Input) {
       set: (key: string, open: boolean) => setToolOpen(key, open),
     },
     revealPart,
+    revealMessage,
     View,
   }
 }

@@ -1,16 +1,22 @@
 import type { FileDiffInfo, SessionMessageUser } from "@opencode/client/promise"
 import { HoverCard } from "@kobalte/core/hover-card"
+import { Tooltip } from "@kobalte/core/tooltip"
 import { ComponentProps, For, Match, Show, createMemo, createSignal, splitProps, Switch } from "solid-js"
 import { useI18n } from "@opencode/ui/context/i18n"
+import { railPillSize } from "./rail-size"
 
 export function MessageNav(
   props: ComponentProps<"ul"> & {
     messages: SessionMessageUser[]
     current?: SessionMessageUser
-    size: "normal" | "compact"
+    size: "normal" | "compact" | "rail"
     onMessageSelect: (message: SessionMessageUser) => void
     getLabel?: (message: SessionMessageUser) => string | undefined
+    getBody?: (message: SessionMessageUser) => string | undefined
     getChanges?: (message: SessionMessageUser) => FileDiffInfo[] | undefined
+    placement?: "left" | "right"
+    /** Space available to the rail, from its wrapper. */
+    railHeight?: number
   },
 ) {
   const i18n = useI18n()
@@ -21,8 +27,11 @@ export function MessageNav(
     "size",
     "onMessageSelect",
     "getLabel",
+    "getBody",
     "getChanges",
     "class",
+    "placement",
+    "railHeight",
   ])
 
   const [hovercardOpen, setHovercardOpen] = createSignal(false)
@@ -31,6 +40,97 @@ export function MessageNav(
     setHovercardOpen(false)
     local.onMessageSelect(message)
   }
+
+  const railSize = createMemo(() => railPillSize(local.railHeight ?? 0, local.messages.length))
+
+  // Auto padding centers the column when it fits and collapses to zero when it overflows, so the top stays reachable.
+  const railPadding = createMemo(() => {
+    const content = local.messages.length * railSize().height + Math.max(0, local.messages.length - 1) * railSize().gap
+
+    return Math.max(0, ((local.railHeight ?? 0) - content) / 2)
+  })
+
+  let pillRefs: HTMLButtonElement[] = []
+
+  const focusPill = (index: number) => {
+    pillRefs[Math.min(local.messages.length - 1, Math.max(0, index))]?.focus()
+  }
+
+  const handleRailKeyDown = (event: KeyboardEvent) => {
+    if (event.key !== "ArrowDown" && event.key !== "ArrowUp" && event.key !== "Home" && event.key !== "End") return
+    event.preventDefault()
+
+    if (event.key === "Home") return focusPill(0)
+
+    if (event.key === "End") return focusPill(local.messages.length - 1)
+
+    const delta = event.key === "ArrowDown" ? 1 : -1
+    const index = pillRefs.findIndex((pill) => pill === document.activeElement)
+
+    focusPill(index < 0 ? (delta > 0 ? 0 : local.messages.length - 1) : index + delta)
+  }
+
+  const label = (message: SessionMessageUser) => local.getLabel?.(message) ?? i18n.t("ui.messageNav.newMessage")
+
+  const rail = () => (
+    <ul
+      {...others}
+      role="toolbar"
+      aria-orientation="vertical"
+      tabindex={0}
+      data-component="message-nav"
+      data-size="rail"
+      class={local.class}
+      style={{
+        gap: `${railSize().gap}px`,
+        "padding-block": `${railPadding()}px`,
+      }}
+      onKeyDown={handleRailKeyDown}
+      onFocus={(event) => {
+        if (event.target !== event.currentTarget) return
+        focusPill(
+          Math.max(
+            0,
+            local.messages.findIndex((message) => message.id === local.current?.id),
+          ),
+        )
+      }}
+    >
+      <For each={local.messages}>
+        {(message, index) => (
+          <li data-slot="message-nav-item">
+            <Tooltip openDelay={120} closeDelay={80} placement={local.placement ?? "right"} gutter={8}>
+              <Tooltip.Trigger
+                ref={(element) => {
+                  pillRefs[index()] = element
+                }}
+                type="button"
+                tabindex={-1}
+                data-slot="message-nav-rail-pill"
+                data-active={message.id === local.current?.id || undefined}
+                aria-label={i18n.t("ui.messageNav.jumpToMessage", {
+                  index: index() + 1,
+                  total: local.messages.length,
+                })}
+                style={{ height: `${railSize().height}px` }}
+                onClick={() => selectMessage(message)}
+              />
+              <Tooltip.Portal>
+                <Tooltip.Content data-slot="message-nav-rail-tooltip">
+                  <bdi dir="auto" data-slot="message-nav-rail-tooltip-content">
+                    <p data-slot="message-nav-rail-tooltip-title">{label(message)}</p>
+                    <Show when={local.getBody?.(message)}>
+                      {(body) => <p data-slot="message-nav-rail-tooltip-body">{body()}</p>}
+                    </Show>
+                  </bdi>
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip>
+          </li>
+        )}
+      </For>
+    </ul>
+  )
 
   const content = (className?: string) => (
     <ul role="list" data-component="message-nav" data-size={local.size} class={className} {...others}>
@@ -104,6 +204,7 @@ export function MessageNav(
         </HoverCard>
       </Match>
       <Match when={local.size === "normal"}>{content(local.class)}</Match>
+      <Match when={local.size === "rail"}>{rail()}</Match>
     </Switch>
   )
 }

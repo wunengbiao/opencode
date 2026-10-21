@@ -129,6 +129,28 @@ describe("FileSystemSearch", () => {
     }),
   )
 
+  it.effect("follows symlinks when scanning the ripgrep index", () =>
+    Effect.gen(function* () {
+      let observed: Ripgrep.FindInput | undefined
+      const layer = AppNodeBuilder.build(FileSystemSearch.node, [
+        Location.node.replace(
+          Layer.succeed(
+            Location.Service,
+            Location.Service.of(
+              location({ directory: AbsolutePath.make(path.join(os.tmpdir(), "opencode-search-symlink")) }),
+            ),
+          ),
+        ),
+        Ripgrep.node.replace(ripgrepStub("src/link.ts", (input) => (observed = input))),
+      ])
+      yield* Effect.gen(function* () {
+        const search = yield* FileSystemSearch.Service
+        yield* search.find({ query: "link", type: "file" })
+        expect(observed?.follow).toBe(true)
+      }).pipe(Effect.provide(layer))
+    }),
+  )
+
   it.effect("refreshes a stale ripgrep index atomically without blocking search", () =>
     Effect.gen(function* () {
       let scans = 0

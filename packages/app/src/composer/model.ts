@@ -4,7 +4,7 @@ import type { ReferenceInfo } from "@opencode/client/promise"
 import type { Links, MountedSession } from "@opencode/gui-extensions/sdk"
 import { createComponent, createEffect, createMemo, on } from "solid-js"
 import { Predicate } from "effect"
-import type { ComposerSuggestion } from "./types"
+import type { ComposerFilePart, ComposerSuggestion } from "./types"
 import { createComposerEditor, createComposerEditorState, type ComposerEditorModel } from "./editor/interaction"
 import { selectionFromLines, type SelectedLineRange, useFile } from "@/workspaces/files/model"
 import { useComments } from "@/composer/comments"
@@ -317,13 +317,19 @@ export function createComposerModel(adapter: ComposerAdapter, options?: { queue?
     commands,
     context,
     searchContextFiles: async (query) =>
-      (await files.searchFilesAndDirectories(query)).map((path) => ({
-        id: `file:${path}`,
-        kind: "file",
-        label: path,
-        path,
-        mention: { type: "file", path, content: `@${path}`, start: 0, end: 0 },
-      })),
+      (await files.searchFileEntries(query)).map((entry) => {
+        const mention: ComposerFilePart = {
+          type: "file",
+          path: entry.path,
+          content: `@${entry.path}`,
+          start: 0,
+          end: 0,
+        }
+
+        if (entry.type === "directory") mention.mime = "application/x-directory"
+
+        return { id: `file:${entry.path}`, kind: "file", label: entry.path, path: entry.path, mention }
+      }),
     onContextRemove(item) {
       if (item.type === "file" && item.commentID) comments.remove(item.path, item.commentID)
     },

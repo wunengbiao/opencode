@@ -146,6 +146,7 @@ const source = {
   "ui.fileSearch.close": "Close search",
 
   "ui.messageNav.newMessage": "New message",
+  "ui.messageNav.jumpToMessage": "Jump to message {{index}} of {{total}}",
 
   "ui.promptInput.noMatchingItems": "No matching items",
   "ui.promptInput.commands": "Commands",

@@ -80,6 +80,19 @@ test.each<{
     popover: { type: "context", query: "sr" },
   },
   {
+    name: "completes a directory mention that abuts typed path text",
+    event: { type: "input.changed", value: "@src/lib", persist: false },
+    draft: {
+      prompt: [
+        { type: "file", path: "src/", content: "@src/", start: 0, end: 5, mime: "application/x-directory" },
+        { type: "text", content: "lib", start: 5, end: 8 },
+      ],
+      cursor: 8,
+      context: { items: [] },
+    },
+    popover: { type: "context", query: "src/lib" },
+  },
+  {
     name: "enters shell mode from an initial exclamation mark",
     event: { type: "input.changed", value: "!", persist: false },
     draft: persisted("!"),

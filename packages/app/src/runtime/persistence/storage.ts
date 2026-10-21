@@ -708,6 +708,14 @@ export function persisted<S extends Schema.ConstraintCodec<object, unknown>>(
       getItem: async (key) => {
         const value = await readCurrentAsync({ storage: current, key, normalize })
 
+        // A save completed while this read was in flight; returning the stored snapshot would
+        // clobber those newer bytes, so publish them again and keep them in memory.
+        if (draftLatest !== undefined) {
+          await current.setItem(key, draftLatest)
+
+          return draftLatest
+        }
+
         if (value !== undefined) return value
 
         const relocated = await relocateStoredValueAsync({

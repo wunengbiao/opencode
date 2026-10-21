@@ -93,6 +93,26 @@ export function touchCachedMarkdown(key: string, value: MarkdownCacheEntry) {
   cache.delete(first)
 }
 
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;")
+
+/** Parses markdown on the main thread when the worker is gone. Code blocks stay escaped: no highlighter runs. */
+export async function fallbackMarkdown(text: string) {
+  try {
+    const { createMarkdownParser } = await import("@opencode/ui/context/marked-parser")
+
+    const parser = createMarkdownParser((code, language) => {
+      const name = escapeHtml(language || "text")
+
+      return `<pre class="shiki OpenCode"><code class="language-${name}">${escapeHtml(code)}</code></pre>`
+    })
+
+    return sanitizeMarkdown(await parser.parse(text))
+  } catch {
+    return ""
+  }
+}
+
 export async function preloadMarkdown(text: string, cacheKey: string, signal?: AbortSignal) {
   if (signal?.aborted) throw new MarkdownWorkerDisposedError()
   const block = { raw: text, src: text }

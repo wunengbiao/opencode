@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test"
-import { getCursorPosition, getTextLength, setCursorPosition } from "./dom"
+import { ensureCaretAnchor, getCursorPosition, getTextLength, setCursorPosition, snapCaret } from "./dom"
 
 const br = () => document.createElement("br")
 
@@ -60,3 +60,54 @@ test.each<{ name: string; nodes: () => Node[]; length: number; caret: [number, n
 
   container.remove()
 })
+
+test("snaps a caret on the last pill to a placeable position after it", () => {
+  const container = document.createElement("div")
+  const chip = pill()
+  container.append(text("a "), chip)
+  document.body.appendChild(container)
+  place(chip, 0)
+  snapCaret(container)
+
+  const selection = window.getSelection()
+  expect(selection?.anchorNode).toBe(chip.nextSibling)
+  expect(selection?.anchorOffset).toBe(0)
+  expect(getCursorPosition(container)).toBe(7)
+  container.remove()
+})
+
+test("keeps a pill caret before it when editable content follows", () => {
+  const container = document.createElement("div")
+  const chip = pill()
+  container.append(text("a "), chip, text("b"))
+  document.body.appendChild(container)
+  place(chip, 0)
+  snapCaret(container)
+
+  const selection = window.getSelection()
+  expect(selection?.anchorNode).toBe(container.firstChild)
+  expect(selection?.anchorOffset).toBe(2)
+  container.remove()
+})
+
+test("keeps a zero-width anchor inside an emptied editor", () => {
+  const container = document.createElement("div")
+  container.append(pill())
+  ensureCaretAnchor(container)
+  expect(container.lastChild?.textContent).toBe("\u200B")
+
+  container.replaceChildren(br())
+  ensureCaretAnchor(container)
+  expect(container.childNodes).toHaveLength(1)
+  expect(container.firstChild?.textContent).toBe("\u200B")
+  container.remove()
+})
+
+function place(node: Node, offset: number) {
+  const selection = window.getSelection()
+  const range = document.createRange()
+  range.setStart(node, offset)
+  range.collapse(true)
+  selection?.removeAllRanges()
+  selection?.addRange(range)
+}

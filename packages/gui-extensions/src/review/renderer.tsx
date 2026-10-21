@@ -227,6 +227,23 @@ const setup: Setup<typeof Review> = (ctx) => {
     },
   })
 
+  // A file path in message inline code opens the review panel, as it did before extensions.
+  ctx.add(LinkHandler, {
+    priority: 2,
+    match: (link) => link.origin === "inline-code",
+    open(link) {
+      const session = sessions.current()
+
+      if (!session || (link.session && link.session.key !== session.key)) return
+
+      batch(() => {
+        if (session.project) layout.open(KEY, session)
+
+        modelFor(session)?.focusFile(link.href)
+      })
+    },
+  })
+
   const WrapLinesRow = lazy(() => import("./settings"))
   // Settings rows are small; load them while idle so settings opens without a blank row.
   onCleanup(onIdle(() => void WrapLinesRow.preload()))

@@ -1,6 +1,7 @@
 import { createSignal, Show } from "solid-js"
 import { render } from "solid-js/web"
 import { DialogProvider } from "@opencode/ui/context/dialog"
+import { parsePathLineSuffix } from "@opencode/util/path"
 import { Markdown } from "../src/components/markdown"
 import { preloadMarkdown } from "../src/components/markdown-cache"
 import { MarkdownProvider } from "../src/context/markdown"
@@ -8,6 +9,7 @@ import { OpenCode } from "@opencode/client/promise"
 import { readLocalImage } from "../../app/src/runtime/server/image"
 
 export {
+  fallbackMarkdown,
   getCachedMarkdown,
   renderCachedMarkdown,
   sanitizeMarkdown,
@@ -42,6 +44,7 @@ export async function mountMarkdown(options: {
     const [text, setText] = createSignal(options.text)
     const [streaming, setStreaming] = createSignal(options.streaming ?? false)
     const [visible, setVisible] = createSignal(true)
+    const [opened, setOpened] = createSignal("")
 
     return (
       <DialogProvider>
@@ -53,11 +56,13 @@ export async function mountMarkdown(options: {
           onChange={(event) => setStreaming(event.currentTarget.checked)}
         />
         <button onClick={() => setVisible((value) => !value)}>Toggle Markdown</button>
+        <output data-testid="opened-local-file">{opened()}</output>
         <MarkdownProvider
           readImage={(path, signal) =>
             options.images ? readLocalImage(api, "C:/project", path, signal) : Promise.resolve(undefined)
           }
-          localFileExists={(path) => Promise.resolve(existingFiles.has(path))}
+          openLocalFile={(path) => setOpened(path)}
+          localFileExists={(path) => Promise.resolve(existingFiles.has(parsePathLineSuffix(path).path))}
         >
           <Show when={visible()}>
             <Markdown

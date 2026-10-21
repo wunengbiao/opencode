@@ -31,6 +31,112 @@ export function getCursorPosition(parent: HTMLElement): number {
   return getTextLength(preCaretRange.cloneContents())
 }
 
+/** Keeps a placeable anchor after a trailing pill and replaces a stray empty-editor break. */
+export function ensureCaretAnchor(editor: HTMLElement) {
+  const last = editor.lastChild
+
+  if (last instanceof HTMLElement && last.dataset.mention) {
+    editor.appendChild(document.createTextNode("\u200B"))
+
+    return
+  }
+
+  const nodes = Array.from(editor.childNodes)
+
+  if (nodes.length > 0 && !nodes.every(isEmptyCaretNode)) return
+  editor.replaceChildren(document.createTextNode("\u200B"))
+}
+
+function isEmptyCaretNode(node: Node) {
+  if (node.nodeType === Node.TEXT_NODE) return !node.textContent
+
+  return node instanceof HTMLElement && node.tagName === "BR"
+}
+
+/**
+ * A collapsed caret cannot rest inside or on either edge of an uneditable pill. Snap it into
+ * the adjacent text node so the next keystroke lands where the caret is drawn.
+ */
+export function snapCaret(editor: HTMLElement) {
+  const selection = window.getSelection()
+
+  if (!selection || !selection.isCollapsed || selection.rangeCount === 0) return
+  const anchor = selection.anchorNode
+
+  if (!anchor || !editor.contains(anchor)) {
+    if (document.activeElement !== editor) return
+    ensureCaretAnchor(editor)
+    setCursorPosition(editor, getTextLength(editor))
+
+    return
+  }
+
+  if (anchor === editor) {
+    const before = editor.childNodes[selection.anchorOffset - 1]
+    const after = editor.childNodes[selection.anchorOffset]
+
+    if (before instanceof HTMLElement && before.dataset.mention) return snapAfterChip(before)
+
+    if (after instanceof HTMLElement && after.dataset.mention) return snapBeforeChip(after)
+
+    if (before instanceof Text && before.length > 0) return placeCaret(before, before.length)
+
+    if (after instanceof Text) return placeCaret(after, 0)
+
+    return
+  }
+
+  if (!(anchor instanceof HTMLElement) || !anchor.dataset.mention) return
+
+  // Clicking the final pill usually means "caret at the end". With only whitespace after it,
+  // always snap after the pill instead of letting the click's half decide.
+  if (selection.anchorOffset <= 0 && !editableContentFollows(anchor)) return snapAfterChip(anchor)
+
+  return selection.anchorOffset <= 0 ? snapBeforeChip(anchor) : snapAfterChip(anchor)
+}
+
+function editableContentFollows(chip: HTMLElement) {
+  let node: Node | null = chip.nextSibling
+
+  while (node) {
+    if (node instanceof HTMLElement) return true
+
+    if (node instanceof Text && (node.textContent ?? "").trim().length > 0) return true
+    node = node.nextSibling
+  }
+
+  return false
+}
+
+function snapAfterChip(chip: HTMLElement) {
+  const following = chip.nextSibling
+
+  if (following instanceof Text) return placeCaret(following, 0)
+  const anchor = document.createTextNode("\u200B")
+  chip.after(anchor)
+  placeCaret(anchor, 0)
+}
+
+function snapBeforeChip(chip: HTMLElement) {
+  const previous = chip.previousSibling
+
+  if (previous instanceof Text) return placeCaret(previous, previous.length)
+  const anchor = document.createTextNode("\u200B")
+  chip.before(anchor)
+  placeCaret(anchor, 1)
+}
+
+function placeCaret(node: Node, offset: number) {
+  const selection = window.getSelection()
+
+  if (!selection) return
+  const range = document.createRange()
+  range.setStart(node, offset)
+  range.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(range)
+}
+
 export function setCursorPosition(parent: HTMLElement, position: number) {
   let remaining = position
   let node = parent.firstChild

@@ -1,5 +1,6 @@
 import { useI18n } from "@opencode/ui/context/i18n"
 import { checksum } from "@opencode/util/encode"
+import { parsePathLineSuffix } from "@opencode/util/path"
 import {
   type ComponentProps,
   createEffect,
@@ -28,6 +29,7 @@ import {
 import { markdownBlockKey, type MarkdownToken } from "./markdown-worker-protocol"
 import { shouldResetCodeTokens, type RenderedCodeState } from "./markdown-code-state"
 import {
+  fallbackMarkdown,
   getCachedMarkdown,
   getReadyMarkdown,
   renderCachedMarkdown,
@@ -392,6 +394,8 @@ function markInlineCode(
 
   for (const code of source.querySelectorAll<HTMLElement>(":not(pre) > code")) {
     delete code.dataset.inlineCodeKind
+
+    if (code.dataset.slot === "markdown-file-path") delete code.dataset.slot
     const text = (code.textContent ?? "").trim()
     const kind = inlineCodeKind(text)
 
@@ -405,7 +409,9 @@ function markInlineCode(
       .then((exists) => {
         if (!exists) return
         target.querySelectorAll<HTMLElement>(":not(pre) > code").forEach((node) => {
-          if (!node.closest("a") && (node.textContent ?? "").trim() === text) node.dataset.inlineCodeKind = "path"
+          if (node.closest("a") || (node.textContent ?? "").trim() !== text) return
+          node.dataset.inlineCodeKind = "path"
+          node.dataset.slot = "markdown-file-path"
         })
       })
       .catch(() => undefined)
@@ -416,24 +422,32 @@ function localLinkTarget(target: EventTarget | null) {
   if (!(target instanceof Element)) return
   const link = target.closest("a[data-local-link]")
 
-  if (link instanceof HTMLElement) return link.dataset.localLink
+  if (link instanceof HTMLElement) return { path: link.dataset.localLink, source: undefined } as const
   // Bare inline paths such as `src/app.ts` open like links when the host can resolve them.
   const code = target.closest(':not(pre) > code[data-inline-code-kind="path"]')
 
-  if (code instanceof HTMLElement && !code.closest("a")) return code.textContent?.trim() || undefined
+  if (code instanceof HTMLElement && !code.closest("a")) {
+    const path = parsePathLineSuffix(code.textContent?.trim() ?? "").path
+
+    if (path) return { path, source: "inline-code" } as const
+  }
 }
 
 function setupLocalLinks(root: HTMLDivElement, open: () => OpenMarkdownLocalFile | undefined) {
   const handleClick = (event: MouseEvent) => {
     if (event.defaultPrevented || event.button !== 0) return
-    const path = localLinkTarget(event.target)
+    const target = localLinkTarget(event.target)
 
-    if (!path) return
+    if (!target?.path) return
+
+    // Clicking inside a text selection must not follow the link.
+    if (!window.getSelection()?.isCollapsed) return
+
     const handler = open()
 
     if (!handler) return
     event.preventDefault()
-    handler(path)
+    handler(target.path, target.source)
   }
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -594,7 +608,10 @@ export function Markdown(
   )
 
   const currentProjection = () => {
+    if (projection.error) return completedProjection(local.text)
+
     if (!(local.streaming ?? false) && !streamed) return completedProjection(local.text)
+
     const value = projection.latest
 
     if (value?.text === local.text) return value
@@ -620,7 +637,12 @@ export function Markdown(
           key: local.cacheKey,
           projection: pendingProjection(local.text),
         }
-      const value = !(local.streaming ?? false) && !streamed ? completedProjection(local.text) : projection.latest
+
+      const value = projection.error
+        ? completedProjection(local.text)
+        : !(local.streaming ?? false) && !streamed
+          ? completedProjection(local.text)
+          : projection.latest
 
       if (!value || value.text !== local.text) return
 
@@ -687,24 +709,27 @@ export function Markdown(
         }),
       )
         .then((blocks) => ({ text: src.text, blocks, ready: true }) satisfies RenderResult)
-        .catch(
-          () =>
-            (lifetime.signal.aborted
-              ? { text: src.text, blocks: [], ready: false }
-              : {
-                  text: src.text,
-                  ready: true,
-                  blocks: [
-                    {
-                      key: base ?? "fallback",
-                      mode: "full" as const,
-                      raw: src.text,
-                      hash: checksum(src.text) ?? "",
-                      html: fallback(src.text),
-                    },
-                  ],
-                }) satisfies RenderResult,
-        )
+        .catch(async () => {
+          if (lifetime.signal.aborted) return { text: src.text, blocks: [], ready: false } satisfies RenderResult
+          const hash = checksum(src.text)
+          const parsed = (await fallbackMarkdown(src.text)) || fallback(src.text)
+
+          if (base && hash) touchCachedMarkdown(`${base}:0:full`, { raw: src.text, hash, html: parsed })
+
+          return {
+            text: src.text,
+            ready: true,
+            blocks: [
+              {
+                key: base ?? "fallback",
+                mode: "full" as const,
+                raw: src.text,
+                hash: hash ?? "",
+                html: parsed,
+              },
+            ],
+          } satisfies RenderResult
+        })
     },
     { initialValue: initial },
   )

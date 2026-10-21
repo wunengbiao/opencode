@@ -2,8 +2,11 @@ import { createContext, useContext, type ParentProps } from "solid-js"
 
 export type ReadMarkdownImage = (path: string, signal: AbortSignal) => Promise<Blob | undefined>
 
-/** Open a local file path linked from markdown. The path is decoded and may be relative or absolute. */
-export type OpenMarkdownLocalFile = (path: string) => void
+/**
+ * Open a local file path linked from markdown. The path is decoded and may be relative or absolute; an inline-code path
+ * arrives with its line suffix stripped. `source` names where markdown found it.
+ */
+export type OpenMarkdownLocalFile = (path: string, source?: "inline-code") => void
 
 /**
  * Whether an inline-code path names a file that exists. Inline code is styled as a file link only when this says yes;

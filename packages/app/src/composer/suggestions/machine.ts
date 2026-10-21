@@ -1,5 +1,5 @@
 import type { ComposerHistoryEntry, ComposerPersistedState, ComposerSuggestion } from "../types"
-import { isAttachment } from "../prompt-parts"
+import { isAttachment, mentionQuery } from "../prompt-parts"
 
 export type ComposerInteractionState = {
   mode: "normal" | "shell"
@@ -63,7 +63,7 @@ export function transitionComposer(
   event: ComposerInteractionEvent,
   persisted: ComposerPersistedState,
 ): ComposerEditorTransition {
-  if (event.type === "input.changed") return inputChanged(state, event.value, event.persist !== false, persisted.cursor)
+  if (event.type === "input.changed") return inputChanged(state, event.value, event.persist !== false, persisted)
 
   if (event.type === "commands.open") return openCommands(state, persisted)
 
@@ -102,7 +102,7 @@ function inputChanged(
   state: ComposerInteractionState,
   value: string,
   persist: boolean,
-  cursor: number | undefined,
+  persisted: ComposerPersistedState,
 ): ComposerEditorTransition {
   const setText: ComposerInteractionCommand[] = persist ? [{ type: "draft.setText", value }] : []
 
@@ -112,14 +112,14 @@ function inputChanged(
     ])
   }
 
-  const context = value.slice(0, cursor ?? value.length).match(/(?:^|\s)@([^\s@]*)$/)
+  const context = persist
+    ? mentionQuery([{ type: "text", content: value, start: 0, end: value.length }], value.length)
+    : mentionQuery(persisted.prompt, persisted.cursor ?? value.length)
 
   if (context) {
-    const query = context[1] ?? ""
-
-    return changed({ ...state, popover: { type: "context", query }, focus: "editor" }, [
+    return changed({ ...state, popover: { type: "context", query: context.query }, focus: "editor" }, [
       ...setText,
-      { type: "popover.filter", popover: "context", query },
+      { type: "popover.filter", popover: "context", query: context.query },
     ])
   }
 

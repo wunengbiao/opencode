@@ -561,10 +561,18 @@ export const dict = {
   "session.running.stop.subagent": "Interrupt subagent",
   "session.running.stop.shell": "Kill shell command",
 
+  "session.subagent.nav": "Subagents",
+  "session.subagent.status.pending": "Pending",
+  "session.subagent.status.running": "Running",
+  "session.subagent.status.completed": "Completed",
+  "session.subagent.status.error": "Failed",
+  "session.subagent.tooltip": "{{status}}: {{description}}",
+
   "session.files.selectToOpen": "Select a file to open",
 
   "session.messages.loading": "Loading messages…",
   "session.messages.jumpToLatest": "Jump to latest",
+  "session.messages.nav": "User messages",
 
   "session.question.progress": "{{current}} of {{total}} questions",
   "session.question.title": "Question",

@@ -44,6 +44,7 @@ import type {
   ComposerSuggestion,
 } from "../types"
 import type { ComposerEditorModel, ComposerSelectControl } from "./interaction"
+import { ensureCaretAnchor, getCursorPosition, snapCaret } from "./dom"
 import { isAttachment } from "../prompt-parts"
 import "../attachments/attachments.css"
 import "./editor.css"
@@ -75,6 +76,9 @@ const COMPOSER_SUGGESTION_TOP_PADDING = 8
 const COMPOSER_SUGGESTION_SEARCH_HEIGHT = 28
 
 const COMPOSER_SUGGESTION_CONTEXT_RESERVE = 80
+
+const FOCUSABLE_SELECTOR =
+  "input, textarea, select, [contenteditable='true'], [role='dialog'], [role='menu'], [role='listbox'], [role='combobox']"
 
 export type ComposerEditorProps = {
   controller: ComposerEditorModel
@@ -117,11 +121,21 @@ export function ComposerEditor(props: ComposerEditorProps) {
     onCleanup(() => observer.disconnect())
   })
   let localInput = false
+  let composing = false
 
   const updateCursor = () => {
     if (!editor || !window.getSelection()?.isCollapsed) return
-    props.controller.onCursor(composerCursor(editor))
+    props.controller.onCursor(getCursorPosition(editor))
   }
+
+  onMount(() => {
+    const snapSelection = () => {
+      if (editor && !composing) snapCaret(editor)
+    }
+
+    document.addEventListener("selectionchange", snapSelection)
+    onCleanup(() => document.removeEventListener("selectionchange", snapSelection))
+  })
 
   const mode = createMemo(() => state.mode)
 
@@ -139,10 +153,17 @@ export function ComposerEditor(props: ComposerEditorProps) {
     if (localInput) {
       localInput = false
 
+      if (composing) return
+      ensureCaretAnchor(editor)
+      snapCaret(editor)
+
       return
     }
 
+    if (composing) return
     renderComposerEditor(editor, parts)
+
+    if (document.activeElement === editor) props.controller.restoreCaret()
   })
 
   // Kept out of JSX: an inline ternary prop compiles to a memo created on every read, and the popover reads
@@ -159,7 +180,21 @@ export function ComposerEditor(props: ComposerEditorProps) {
       : undefined
 
   return (
-    <div class={`relative size-full flex flex-col gap-0 ${props.class ?? ""}`}>
+    <div
+      class={`relative size-full flex flex-col gap-0 ${props.class ?? ""}`}
+      onMouseDown={(event) => {
+        if (event.button !== 0) return
+        const target = event.target
+
+        if (!(target instanceof HTMLElement)) return
+
+        if (target.closest('[data-component="composer-editor"]')) return
+
+        if (target.closest(FOCUSABLE_SELECTOR)) return
+        event.preventDefault()
+        requestAnimationFrame(() => props.controller.restoreFocus())
+      }}
+    >
       <input
         ref={props.controller.setFileInput}
         type="file"
@@ -248,7 +283,7 @@ export function ComposerEditor(props: ComposerEditorProps) {
               "text-align": "start",
             }}
             onInput={(event) => {
-              const cursor = composerCursor(event.currentTarget)
+              const cursor = getCursorPosition(event.currentTarget)
               const prompt = parseComposerEditor(event.currentTarget)
               const attachments = props.controller.parts().filter(isAttachment)
               localInput = true
@@ -293,6 +328,17 @@ export function ComposerEditor(props: ComposerEditorProps) {
               })
             }}
             onFocus={() => props.controller.dispatch({ type: "focus.editor" })}
+            onCompositionStart={() => {
+              composing = true
+            }}
+            onCompositionEnd={() => {
+              composing = false
+              requestAnimationFrame(() => {
+                if (!editor || composing) return
+                ensureCaretAnchor(editor)
+                snapCaret(editor)
+              })
+            }}
           />
           <Show when={!props.controller.value()}>
             <div
@@ -414,47 +460,42 @@ export function ComposerEditor(props: ComposerEditorProps) {
 const mentionParts = new WeakMap<HTMLElement, Exclude<ComposerPrompt[number], ComposerAttachment | { type: "text" }>>()
 
 function renderComposerEditor(editor: HTMLDivElement, prompt: ComposerPrompt) {
-  const active = document.activeElement === editor
-  editor.replaceChildren(
-    ...prompt.flatMap<Node>((part) => {
-      if (isAttachment(part)) return []
+  const nodes = prompt.flatMap<Node>((part) => {
+    if (isAttachment(part)) return []
 
-      if (part.type === "text") return [document.createTextNode(part.content)]
-      const mention = document.createElement("span")
-      mentionParts.set(mention, part)
-      mention.textContent = part.content
-      mention.contentEditable = "false"
-      mention.dir = "auto"
-      mention.style.unicodeBidi = "isolate"
-      mention.dataset.mention =
-        part.type === "file" && part.mime === "application/x-directory" ? "reference" : part.type
+    if (part.type === "text") return part.content ? [document.createTextNode(part.content)] : []
+    const mention = document.createElement("span")
+    mentionParts.set(mention, part)
+    mention.textContent = part.content
+    mention.contentEditable = "false"
+    mention.dir = "auto"
+    mention.style.unicodeBidi = "isolate"
+    mention.dataset.mention =
+      part.type === "file" && part.mime === "application/x-directory" ? "reference" : part.type
 
-      if (part.type === "agent") mention.dataset.name = part.name
+    if (part.type === "agent") mention.dataset.name = part.name
 
-      if (part.type === "skill") {
-        mention.dataset.id = part.id
-        mention.dataset.name = part.name
-      }
+    if (part.type === "skill") {
+      mention.dataset.id = part.id
+      mention.dataset.name = part.name
+    }
 
-      if (part.type === "file") {
-        mention.dataset.path = part.path
+    if (part.type === "file") {
+      mention.dataset.path = part.path
 
-        if (part.mime) mention.dataset.mime = part.mime
+      if (part.mime) mention.dataset.mime = part.mime
 
-        if (part.filename) mention.dataset.filename = part.filename
-      }
+      if (part.filename) mention.dataset.filename = part.filename
+    }
 
-      return [mention]
-    }),
-  )
+    return [mention]
+  })
 
-  if (!active) return
-  const selection = window.getSelection()
-  const range = document.createRange()
-  range.selectNodeContents(editor)
-  range.collapse(false)
-  selection?.removeAllRanges()
-  selection?.addRange(range)
+  // A pill as the last child has no caret position after it; keep a zero-width text anchor.
+  const last = nodes[nodes.length - 1]
+
+  if (!(last instanceof Text) || last.length === 0) nodes.push(document.createTextNode("\u200B"))
+  editor.replaceChildren(...nodes)
 }
 
 function parseComposerEditor(editor: HTMLDivElement) {
@@ -524,7 +565,7 @@ function parseComposerEditor(editor: HTMLDivElement) {
 
   const visit = (node: Node) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      buffer += node.textContent ?? ""
+      buffer += (node.textContent ?? "").replaceAll("\u200B", "")
 
       return
     }
@@ -563,17 +604,6 @@ function parseComposerEditor(editor: HTMLDivElement) {
   if (parts.length > 0) return parts
 
   return [{ type: "text" as const, content: "", start: 0, end: 0 }]
-}
-
-function composerCursor(editor: HTMLDivElement) {
-  const selection = window.getSelection()
-
-  if (!selection?.rangeCount || !editor.contains(selection.anchorNode)) return editor.textContent?.length ?? 0
-  const range = selection.getRangeAt(0).cloneRange()
-  range.selectNodeContents(editor)
-  range.setEnd(selection.anchorNode!, selection.anchorOffset)
-
-  return range.toString().length
 }
 
 export function ComposerAttachments(props: {
@@ -1171,9 +1201,13 @@ function ComposerSuggestionIcon(props: { item: ComposerSuggestion }) {
 
   if (props.item.kind === "command") return null
 
+  const directory =
+    props.item.kind === "reference" ||
+    (props.item.mention?.type === "file" && props.item.mention.mime === "application/x-directory")
+
   return (
     <FileIcon
-      node={{ path: props.item.path ?? props.item.label, type: props.item.kind === "reference" ? "directory" : "file" }}
+      node={{ path: props.item.path ?? props.item.label, type: directory ? "directory" : "file" }}
       class="size-4 shrink-0"
     />
   )
