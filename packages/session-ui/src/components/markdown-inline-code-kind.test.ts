@@ -35,6 +35,10 @@ describe("inlineCodeKind", () => {
     expect(inlineCodeKind(`~/.config/opencode`)).toBe("path")
     expect(inlineCodeKind(`@opencode-ai/app`)).toBe("path")
     expect(inlineCodeKind(`session/status`)).toBe("path")
+    expect(inlineCodeKind(`prompt.ts:1069`)).toBe("path")
+    expect(inlineCodeKind(`prompt.ts:12:4`)).toBe("path")
+    expect(inlineCodeKind(`prompt.ts#L10-L20`)).toBe("path")
+    expect(inlineCodeKind(`:1069`)).toBeUndefined()
   })
 
   test("detects urls", () => {

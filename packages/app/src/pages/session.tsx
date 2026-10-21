@@ -40,6 +40,7 @@ import { showToast } from "@/utils/toast"
 import { base64Encode, checksum } from "@opencode-ai/core/util/encode"
 import { useLocation, useNavigate, useParams, useSearchParams } from "@solidjs/router"
 import { NewSessionView, SessionHeader } from "@/components/session"
+import { DialogSelectFilePath } from "@/components/dialog-select-file-path"
 import { ErrorPage } from "@/pages/error"
 import { CommentsProvider, useComments } from "@/context/comments"
 import { useCommand } from "@/context/command"
@@ -70,7 +71,14 @@ import {
   createSessionComposerRegionController,
   SessionComposerRegion,
 } from "@/pages/session/composer"
-import { createOpenReviewFile, createSessionTabs, createSizing, shouldShowFileTree } from "@/pages/session/helpers"
+import {
+  createOpenReviewFile,
+  createSessionTabs,
+  createSizing,
+  matchFilePaths,
+  normalizeMessageFilePath,
+  shouldShowFileTree,
+} from "@/pages/session/helpers"
 import { MessageTimeline } from "@/pages/session/timeline/message-timeline"
 import { createTimelineModel } from "@/pages/session/timeline/model"
 import { type DiffStyle, SessionReviewTab, type SessionReviewTabProps } from "@/pages/session/review-tab"
@@ -339,7 +347,7 @@ function SessionPanelFrame(props: ParentProps<{ newLayout: boolean; raised?: boo
     <div
       classList={{
         "flex-1 min-h-0 flex flex-col": true,
-        "relative": props.newLayout,
+        relative: props.newLayout,
         "bg-v2-background-bg-base": props.newLayout,
         "bg-background-stronger": !props.newLayout,
         "rounded-[10px] overflow-hidden": props.newLayout,
@@ -1163,11 +1171,35 @@ export default function Page() {
     loadFile: file.load,
   })
 
+  let messageFilePathRequest = 0
+
   const openMessageFilePath = (value: string) => {
     const path = value.replace(/#L\d+(?:-L\d+)?$/, "").replace(/:\d+(?::\d+)?$/, "")
     if (!path) return
-    openReviewPanel()
-    openReviewFile(path)
+    const query = normalizeMessageFilePath(path)
+    if (!query) return
+
+    const open = (target: string) => {
+      openReviewPanel()
+      openReviewFile(target)
+    }
+
+    const request = ++messageFilePathRequest
+    void file.searchFiles(query, { limit: 200 }).then(
+      (files) => {
+        if (request !== messageFilePathRequest) return
+        const matches = matchFilePaths(query, files)
+        if (matches.length === 0) return open(path)
+        if (matches.length === 1) return open(matches[0])
+        const exact = matches.find((match) => normalizeMessageFilePath(match) === query)
+        if (exact) return open(exact)
+        void dialog.show(() => <DialogSelectFilePath paths={matches} onSelect={open} />)
+      },
+      () => {
+        if (request !== messageFilePathRequest) return
+        open(path)
+      },
+    )
   }
 
   const changesLabel = (option: ChangeMode) => {

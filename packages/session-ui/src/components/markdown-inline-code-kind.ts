@@ -1895,7 +1895,8 @@ export function inlineCodeKind(text: string): "path" | "url" | undefined {
   if (/^\/[a-z][a-z0-9-]*$/i.test(text)) return
   if (/\s/.test(text)) return
   if (/[()\[\]{}*+=<>|&^"';]/.test(text)) return
-  if (/[/\\]/.test(text) || /^\.\.?[/\\]/.test(text) || hasPathExtension(text) || hasPathFileName(text)) return "path"
+  const path = text.replace(/#L\d+(?:-L\d+)?$/, "").replace(/:\d+(?::\d+)?$/, "")
+  if (/[/\\]/.test(path) || /^\.\.?[/\\]/.test(path) || hasPathExtension(path) || hasPathFileName(path)) return "path"
 }
 
 function hasPathExtension(text: string) {

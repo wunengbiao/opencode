@@ -32,7 +32,6 @@ import { ConfigManaged } from "./managed"
 import { ConfigParse } from "./parse"
 import { ConfigPaths } from "./paths"
 import { ConfigPlugin } from "./plugin"
-import { ConfigProxy } from "./proxy"
 import { ConfigVariable } from "./variable"
 import { ConfigV2Compat } from "./v2-compat"
 import { Npm } from "@opencode-ai/core/npm"
@@ -290,8 +289,6 @@ const layer = Layer.effect(
         )
       }
 
-      yield* ConfigProxy.apply(result.proxy)
-
       return result
     })
 
@@ -435,9 +432,6 @@ const layer = Layer.effect(
         if (Flag.OPENCODE_CONFIG_DIR) {
           yield* Effect.logDebug("loading config from OPENCODE_CONFIG_DIR", { path: Flag.OPENCODE_CONFIG_DIR })
         }
-
-        // Early apply so npm installs and account config fetches route through the proxy; the fully merged value is re-applied before returning.
-        yield* ConfigProxy.apply(result.proxy)
 
         const deps: Fiber.Fiber<void>[] = []
 
@@ -603,8 +597,6 @@ const layer = Layer.effect(
           result.compaction = { ...result.compaction, prune: false }
         }
 
-        yield* ConfigProxy.apply(result.proxy)
-
         return {
           config: result,
           directories,
@@ -651,7 +643,6 @@ const layer = Layer.effect(
       const original = text ? ConfigParse.jsonc(text, file) : writable(existing)
       const merged = mergeDeep(isRecord(original) ? original : writable(existing), writable(config))
       yield* fs.writeFileString(file, JSON.stringify(merged, null, 2)).pipe(Effect.orDie)
-      if (config.proxy !== undefined) yield* ConfigProxy.apply(merged.proxy)
     })
 
     const invalidate = Effect.fn("Config.invalidate")(function* () {
@@ -679,8 +670,6 @@ const layer = Layer.effect(
         changed = updated !== before
         if (changed) yield* fs.writeFileString(file, updated).pipe(Effect.orDie)
       }
-
-      yield* ConfigProxy.apply(next.proxy)
 
       if (changed) yield* invalidate()
       return { info: next, changed }

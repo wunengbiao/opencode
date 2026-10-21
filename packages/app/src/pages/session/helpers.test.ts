@@ -8,6 +8,8 @@ import {
   createSessionTabs,
   focusTerminalById,
   getTabReorderIndex,
+  matchFilePaths,
+  normalizeMessageFilePath,
   shouldShowFileTree,
 } from "./helpers"
 
@@ -15,6 +17,55 @@ describe("shouldShowFileTree", () => {
   test("does not reserve space for a disabled file tree", () => {
     expect(shouldShowFileTree({ visible: false, opened: true })).toBe(false)
     expect(shouldShowFileTree({ visible: true, opened: true })).toBe(true)
+  })
+})
+
+describe("normalizeMessageFilePath", () => {
+  test("normalizes separators and relative prefixes", () => {
+    expect(normalizeMessageFilePath(".\\src\\session\\prompt.ts")).toBe("src/session/prompt.ts")
+    expect(normalizeMessageFilePath("/src/session/prompt.ts")).toBe("src/session/prompt.ts")
+    expect(normalizeMessageFilePath("./src//session/prompt.ts")).toBe("src/session/prompt.ts")
+  })
+})
+
+describe("matchFilePaths", () => {
+  const candidates = [
+    "packages/opencode/src/session/prompt.ts",
+    "packages/app/src/session/prompt.ts",
+    "packages/opencode/src/session/prompt.tsx",
+    "packages/opencode/src/session/prompt.ts.bak",
+  ]
+
+  test("matches a bare filename against every nested candidate", () => {
+    expect(matchFilePaths("prompt.ts", candidates)).toEqual([
+      "packages/opencode/src/session/prompt.ts",
+      "packages/app/src/session/prompt.ts",
+    ])
+  })
+
+  test("matches a partial directory suffix", () => {
+    expect(matchFilePaths("session/prompt.ts", candidates)).toEqual([
+      "packages/opencode/src/session/prompt.ts",
+      "packages/app/src/session/prompt.ts",
+    ])
+  })
+
+  test("normalizes the clicked path before matching", () => {
+    expect(matchFilePaths(".\\app\\src\\session\\prompt.ts", candidates)).toEqual([
+      "packages/app/src/session/prompt.ts",
+    ])
+  })
+
+  test("does not match a similarly named file", () => {
+    expect(matchFilePaths("my-prompt.ts", candidates)).toEqual([])
+  })
+
+  test("returns an empty list for an empty path", () => {
+    expect(matchFilePaths("", candidates)).toEqual([])
+  })
+
+  test("deduplicates candidates with the same normalized path", () => {
+    expect(matchFilePaths("prompt.ts", ["src/prompt.ts", "./src/prompt.ts"])).toEqual(["src/prompt.ts"])
   })
 })
 

@@ -116,6 +116,28 @@ export const focusTerminalById = (id: string) => {
   return true
 }
 
+export function normalizeMessageFilePath(value: string) {
+  return value
+    .replaceAll("\\", "/")
+    .replace(/^\/+/, "")
+    .replace(/^(?:\.\/)+/, "")
+    .replace(/\/{2,}/g, "/")
+}
+
+export const matchFilePaths = (path: string, candidates: readonly string[]) => {
+  const target = normalizeMessageFilePath(path)
+  if (!target) return []
+
+  const seen = new Set<string>()
+  return candidates.filter((candidate) => {
+    const value = normalizeMessageFilePath(candidate)
+    if (!value || seen.has(value)) return false
+    if (value !== target && !value.endsWith(`/${target}`)) return false
+    seen.add(value)
+    return true
+  })
+}
+
 export const createOpenReviewFile = (input: {
   showAllFiles: () => void
   tabForPath: (path: string) => string
