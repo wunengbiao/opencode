@@ -167,7 +167,10 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
     external: ["node-gyp"],
     format: "esm",
     minify: true,
-    bytecode: true,
+    // Older Bun bytecode miscompiles cross-chunk bindings (e.g. the `ws` namespace the HTTP server
+    // needs for websocket upgrades), throwing "Cannot access ... before initialization" at runtime.
+    // Check the runtime, not process.versions: local builds may shim the version check.
+    bytecode: Bun.semver.satisfies(Bun.version, ">=1.4.2"),
     sourcemap: Script.channel === "dev" || Script.channel === "local" ? "inline" : "none",
     splitting: true,
     compile: {

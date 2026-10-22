@@ -627,6 +627,31 @@ test("marks a Console provider with its workspace only when it is also connected
   await expect(menu.getByText(/Anomaly \//)).toHaveCount(0)
 })
 
+test("keeps the agent menu open when the composer had no focus", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 })
+  const { editor } = await openSession(page, {
+    name: "ComposerAgentMenu",
+    provider: NO_PROVIDER,
+    seed: { settings: { general: { showCustomAgents: true } } },
+  })
+
+  // Clicking a control in the composer must not restore editor focus, which also closes the menu.
+  const trigger = page.getByRole("button", { name: "Choose agent", exact: true })
+  const menu = page.getByRole("menu")
+  const option = page.getByRole("menuitemradio", { name: /build/i })
+
+  await editor.blur()
+  await trigger.click()
+  await expect(menu).toBeVisible()
+  await option.click()
+  await expect(menu).toBeHidden()
+
+  // The click that reopens it after a selection must not lose the menu to the editor focus.
+  await trigger.click()
+  await expect(menu).toBeVisible()
+  await expect(menu).toBeFocused()
+})
+
 test("shows thinking on hover or a non-default selection while preserving keyboard access", async ({ page }) => {
   const { editor: input } = await openSession(page, {
     name: "ComposerThinking",

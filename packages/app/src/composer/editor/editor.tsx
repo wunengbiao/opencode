@@ -78,7 +78,7 @@ const COMPOSER_SUGGESTION_SEARCH_HEIGHT = 28
 const COMPOSER_SUGGESTION_CONTEXT_RESERVE = 80
 
 const FOCUSABLE_SELECTOR =
-  "input, textarea, select, [contenteditable='true'], [role='dialog'], [role='menu'], [role='listbox'], [role='combobox']"
+  "button, input, textarea, select, [contenteditable='true'], [role='dialog'], [role='menu'], [role='listbox'], [role='combobox']"
 
 export type ComposerEditorProps = {
   controller: ComposerEditorModel
