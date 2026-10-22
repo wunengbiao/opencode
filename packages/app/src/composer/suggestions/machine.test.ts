@@ -93,6 +93,19 @@ test.each<{
     popover: { type: "context", query: "src/lib" },
   },
   {
+    name: "starts a new context search after a directory mention",
+    event: { type: "input.changed", value: "@src/@acp", persist: false },
+    draft: {
+      prompt: [
+        { type: "file", path: "src/", content: "@src/", start: 0, end: 5, mime: "application/x-directory" },
+        { type: "text", content: "@acp", start: 5, end: 9 },
+      ],
+      cursor: 9,
+      context: { items: [] },
+    },
+    popover: { type: "context", query: "acp" },
+  },
+  {
     name: "enters shell mode from an initial exclamation mark",
     event: { type: "input.changed", value: "!", persist: false },
     draft: persisted("!"),

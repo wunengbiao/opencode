@@ -17,7 +17,8 @@ export function promptLength(prompt: Prompt) {
 
 /**
  * The `@` completion trigger ending at `cursor`. Mentions count as their rendered text, so a
- * mention chip followed immediately by typed path characters completes as one query.
+ * mention chip followed immediately by typed path characters completes as one query. An `@`
+ * typed right after a mention starts a new query instead of extending it.
  */
 export function mentionQuery(prompt: Prompt, cursor?: number) {
   const length = promptLength(prompt)
@@ -26,6 +27,7 @@ export function mentionQuery(prompt: Prompt, cursor?: number) {
   let position = 0
   let trigger = -1
   let previous: string | undefined
+  let abutsMention = false
 
   for (const part of prompt) {
     if (!("content" in part)) continue
@@ -35,7 +37,10 @@ export function mentionQuery(prompt: Prompt, cursor?: number) {
 
     for (let index = 0; index < stop; index++) {
       const char = part.content[index]!
-      const boundary = index === 0 ? previous === undefined || /\s/.test(previous) : /\s/.test(part.content[index - 1]!)
+      const boundary =
+        index === 0
+          ? previous === undefined || /\s/.test(previous) || abutsMention
+          : /\s/.test(part.content[index - 1]!)
 
       if (mention && index === 0) trigger = position
 
@@ -46,6 +51,7 @@ export function mentionQuery(prompt: Prompt, cursor?: number) {
     }
 
     position += part.content.length
+    abutsMention = mention
 
     if (position >= end) break
   }
